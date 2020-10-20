@@ -9,6 +9,8 @@ import src.main.java.com.studql.shape.Rectangle;
 public class Node<T extends Boundable> {
 	private Rectangle mbr = null;
 	private Node<T> parent = null;
+	// nodes all have a list of child nodes, and it's the same for leaves, only
+	// their child only have a record value
 	private List<Node<T>> children = null;
 	private Record<T> record = null;
 
@@ -52,15 +54,19 @@ public class Node<T extends Boundable> {
 	}
 
 	public boolean isLeaf() {
-		if (this.children == null || this.children.size() <= 1) {
+		if (this.children == null || this.children.size() == 0) {
 			return true;
 		}
 		Node<T> leafTest = this.children.get(0);
-		// if it has a record then it's parent is a leaf
+		// if child has a record then the instance it's parent is a leaf
 		if (leafTest.getRecord() != null) {
 			return true;
 		}
 		return false;
+	}
+
+	public boolean isRoot() {
+		return this.parent == null;
 	}
 
 	public void add(Node<T> node) {

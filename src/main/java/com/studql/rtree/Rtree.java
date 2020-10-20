@@ -31,17 +31,23 @@ public final class Rtree<T extends Boundable> {
 
 	public void insert(Record<T> record) {
 		Rectangle recordMbr = record.getMbr();
+		// choose leaf that needs the least enlargement with mbr
 		Node<T> leaf = this.chooseLeaf(recordMbr, this.root);
-		boolean shouldSplit = false;
+		Node<T> newNode = new Node<T>(record);
+		// if node has enough space to insert the child
 		if (leaf.numChildren() < this.max_num_records) {
-			Node<T> newNode = new Node<T>(record);
 			leaf.add(newNode);
+			this.adjustTree(leaf, null);
 		} else {
-			shouldSplit = true;
-			this.quadraticSplit(leaf);
+			Node<T> splitNode = this.quadraticSplit(leaf, newNode);
+			splitNode.setParent(leaf.getParent());
+			this.adjustTree(leaf, splitNode);
+			// if the root was split, create new node
+			if (leaf == this.root) {
+				this.assignNewRoot(leaf, splitNode);
+			}
 		}
 		this.num_entries += 1;
-		this.adjustTree(leaf, shouldSplit);
 	}
 
 	public Node<T> chooseLeaf(Rectangle recordMbr, Node<T> R) {
@@ -50,12 +56,12 @@ public final class Rtree<T extends Boundable> {
 		float minEnlargement = Float.MAX_VALUE;
 		List<Node<T>> minEnlargedRecords = new ArrayList<Node<T>>();
 		// choose record which mbr's enlarge the less with current record's mbr
-		for (Node<T> node : R.getChildren()) {
-			Rectangle currentRectangle = node.getMbr();
-			float enlargement = currentRectangle.calculateEnlargement(recordMbr);
+		for (Node<T> child : R.getChildren()) {
+			Rectangle childMbr = child.getMbr();
+			float enlargement = childMbr.calculateEnlargement(recordMbr);
 			if (enlargement <= minEnlargement) {
 				minEnlargement = enlargement;
-				minEnlargedRecords.add(node);
+				minEnlargedRecords.add(child);
 			}
 		}
 		// resolve ties if any, by choosing the node with least mbr's area
@@ -71,18 +77,29 @@ public final class Rtree<T extends Boundable> {
 		return this.chooseLeaf(recordMbr, minAreaRecord);
 	}
 
-	public void quadraticSplit(Node<T> node) {
-
+	public Node<T> quadraticSplit(Node<T> node, Node<T> overflowNode) {
+		return null;
 	}
 
-	public void adjustTree(Node<T> node, boolean hasSplit) {
-		if (!hasSplit) {
-			node.updateMbr();
-			while (node.getParent() != null) {
-				node = node.getParent();
-				node.updateMbr();
+	public void adjustTree(Node<T> node, Node<T> createdNode) {
+		Node<T> N = node;
+		// node resulting from split
+		Node<T> NN = createdNode;
+		// while we do not reach root
+		if (!N.isRoot()) {
+			N.updateMbr();
+			Node<T> P = N.getParent();
+			// see if parent can accomodate NN
+			if (P.numChildren() < this.max_num_records && NN != null) {
+				P.add(NN);
+			} else if (NN != null) {
+				Node<T> PP = this.quadraticSplit(P, NN);
+				NN.setParent(PP);
+				NN = PP;
 			}
+			N = P;
 		}
+
 	}
 
 	public void delete(Record<T> record) {
@@ -95,6 +112,13 @@ public final class Rtree<T extends Boundable> {
 
 	List<Record<T>> rangeSearch(Rectangle r) {
 		return null;
+	}
+
+	private void assignNewRoot(Node<T> child1, Node<T> child2) {
+		Node<T> newRoot = new Node<T>();
+		newRoot.add(child1);
+		newRoot.add(child2);
+		this.root = newRoot;
 	}
 
 	public String toString() {
