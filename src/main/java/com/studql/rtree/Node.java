@@ -18,6 +18,11 @@ public class Node<T extends Boundable> {
 		this.children = new ArrayList<Node<T>>();
 	}
 
+	public Node(Node<T> child) {
+		this.add(child);
+		this.mbr = child.getMbr();
+	}
+
 	public Node(Record<T> record) {
 		this.record = record;
 		this.mbr = record.getMbr();
@@ -74,6 +79,12 @@ public class Node<T extends Boundable> {
 		node.setParent(this);
 	}
 
+	public void add(List<Node<T>> nodes) {
+		for (Node<T> node : nodes) {
+			this.add(node);
+		}
+	}
+
 	public boolean delete(Node<T> node) {
 		return this.children.remove(node);
 	}
@@ -91,7 +102,7 @@ public class Node<T extends Boundable> {
 			minY = Math.min(minY, mbrLimitDimensions.get(2));
 			maxY = Math.max(maxY, mbrLimitDimensions.get(3));
 		}
-		Rectangle newMbr = new Rectangle(minX, maxY, maxX, minY);
+		Rectangle newMbr = new Rectangle(minX, maxX, minY, maxY);
 		if (newMbr != this.mbr) {
 			this.setMbr(newMbr);
 		}

@@ -15,11 +15,11 @@ public final class Rectangle implements Boundable {
 		this.bottomLeft = new Point(topLeft.getX(), bottomRight.getY());
 	}
 
-	public Rectangle(float xTopLeft, float yTopLeft, float xBottomRight, float yBottomRight) {
-		this.topLeft = new Point(xTopLeft, yTopLeft);
-		this.bottomRight = new Point(xBottomRight, yBottomRight);
-		this.topRight = new Point(xBottomRight, yTopLeft);
-		this.bottomLeft = new Point(xTopLeft, yBottomRight);
+	public Rectangle(float minX, float maxX, float minY, float maxY) {
+		this.topLeft = new Point(minX, maxY);
+		this.bottomRight = new Point(maxX, minY);
+		this.topRight = new Point(maxX, maxY);
+		this.bottomLeft = new Point(minX, minY);
 	}
 
 	public Point getTopLeft() {
@@ -40,16 +40,26 @@ public final class Rectangle implements Boundable {
 
 	@SuppressWarnings("serial")
 	public static ArrayList<Float> getMinMaxDimensions(Rectangle r) {
-		float minInstanceX = r.topLeft.getX(), maxInstanceY = r.topLeft.getY();
-		float maxInstanceX = r.bottomRight.getX(), minInstanceY = r.bottomRight.getY();
+		float minX = r.topLeft.getX(), maxY = r.topLeft.getY();
+		float maxX = r.bottomRight.getX(), minY = r.bottomRight.getY();
 		return new ArrayList<Float>() {
 			{
-				add(minInstanceX);
-				add(maxInstanceX);
-				add(minInstanceY);
-				add(maxInstanceY);
+				add(minX);
+				add(maxX);
+				add(minY);
+				add(maxY);
 			}
 		};
+	}
+
+	public static Rectangle buildRectangle(Rectangle r1, Rectangle r2) {
+		ArrayList<Float> r1Limits = getMinMaxDimensions(r1);
+		ArrayList<Float> r2Limits = getMinMaxDimensions(r2);
+		float minX = Math.min(r1Limits.get(0), r2Limits.get(0));
+		float maxX = Math.max(r1Limits.get(1), r2Limits.get(1));
+		float minY = Math.min(r1Limits.get(2), r2Limits.get(2));
+		float maxY = Math.max(r1Limits.get(3), r2Limits.get(3));
+		return new Rectangle(minX, maxX, minY, maxY);
 	}
 
 	@Override

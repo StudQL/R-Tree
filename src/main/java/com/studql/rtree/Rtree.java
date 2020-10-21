@@ -39,12 +39,14 @@ public final class Rtree<T extends Boundable> {
 			leaf.add(newNode);
 			this.adjustTree(leaf, null);
 		} else {
-			Node<T> splitNode = this.quadraticSplit(leaf, newNode);
-			splitNode.setParent(leaf.getParent());
-			this.adjustTree(leaf, splitNode);
+			Pair<Node<T>, Node<T>> splittedNodes = this.quadraticSplit(leaf, newNode);
+			Node<T> L1 = splittedNodes.getFirst(), L2 = splittedNodes.getSecond();
+			L1.setParent(leaf.getParent());
+			L2.setParent(leaf.getParent());
+			this.adjustTree(L1, L2);
 			// if the root was split, create new node
 			if (leaf == this.root) {
-				this.assignNewRoot(leaf, splitNode);
+				this.assignNewRoot(L1, L2);
 			}
 		}
 		this.num_entries += 1;
@@ -77,8 +79,107 @@ public final class Rtree<T extends Boundable> {
 		return this.chooseLeaf(recordMbr, minAreaRecord);
 	}
 
-	public Node<T> quadraticSplit(Node<T> node, Node<T> overflowNode) {
-		return null;
+	private Pair<Node<T>, Node<T>> quadraticSplit(Node<T> toSplitNode, Node<T> overflowNode) {
+		// create a set of entries mbr
+		ArrayList<Node<T>> records = new ArrayList<Node<T>>();
+		records.add(overflowNode);
+		for (Node<T> childRecord : toSplitNode.getChildren()) {
+			records.add(childRecord);
+		}
+		// find the 2 nodes that maximizes the space waste, and assign them to a node
+		Pair<Node<T>, Node<T>> seeds = this.pickSeeds(records);
+		Node<T> L1 = new Node<T>(seeds.getFirst());
+		Node<T> L2 = new Node<T>(seeds.getSecond());
+		records.remove(seeds.getFirst());
+		records.remove(seeds.getSecond());
+		// examine remaining entries and add them to either L1 or L2 with the least
+		// enlargement criteria
+		int i = 0;
+		while (i < records.size()) {
+			// if one node must take all remaining entries, assign them with no criteria
+			if (L1.numChildren() + records.size() == this.min_num_records) {
+				L1.add(records);
+				break;
+			}
+			if (L2.numChildren() + records.size() == this.min_num_records) {
+				L2.add(records);
+				break;
+			}
+			// add the next record to the node which will require the least enlargement
+			this.pickNext(records, L1, L2);
+			i++;
+		}
+		return new Pair<Node<T>, Node<T>>(L1, L2);
+
+	}
+
+	private Pair<Node<T>, Node<T>> pickSeeds(ArrayList<Node<T>> records) {
+		float maxWaste = 0;
+		Pair<Node<T>, Node<T>> wastefulePair = null;
+		// iterate over all possible pairs
+		for (int i = 0; i < records.size(); i++) {
+			Node<T> E1 = records.get(i);
+			for (int j = i + 1; j < records.size(); j++) {
+				Node<T> E2 = records.get(j);
+				// build rectangle that englobes E1 and E2
+				Rectangle J = Rectangle.buildRectangle(E1.getMbr(), E2.getMbr());
+				float d = J.area() - E1.getMbr().area() - E2.getMbr().area();
+				// chose most wasteful pair
+				if (d > maxWaste) {
+					maxWaste = d;
+					wastefulePair = new Pair<Node<T>, Node<T>>(E1, E2);
+				}
+			}
+		}
+		return wastefulePair;
+	}
+
+	private void pickNext(ArrayList<Node<T>> records, Node<T> L1, Node<T> L2) {
+		Node<T> chosenEntry = null;
+		float maxDifference = 0;
+		// get the max difference between area enlargments
+		for (Node<T> entry : records) {
+			Rectangle entryMbr = entry.getMbr();
+			float enlargementL1 = L1.getMbr().calculateEnlargement(entryMbr);
+			float enlargementL2 = L2.getMbr().calculateEnlargement(entryMbr);
+			float maxEnlargementDifference = Math.abs(enlargementL1 - enlargementL2);
+			if (maxEnlargementDifference >= maxDifference) {
+				chosenEntry = entry;
+				maxDifference = maxEnlargementDifference;
+			}
+		}
+		// selecting group to which we add the selected entry
+		this.resolveTies(L1, L2, chosenEntry);
+		// remove chosenRecord from records
+		records.remove(chosenEntry);
+	}
+
+	private void resolveTies(Node<T> L1, Node<T> L2, Node<T> chosenEntry) {
+		float enlargementL1 = L1.getMbr().calculateEnlargement(chosenEntry.getMbr());
+		float enlargementL2 = L2.getMbr().calculateEnlargement(chosenEntry.getMbr());
+		if (enlargementL1 == enlargementL2) {
+			// select group with min area
+			float area1 = L1.getMbr().area();
+			float area2 = L2.getMbr().area();
+			if (area1 == area2) {
+				int numEntries1 = L1.numChildren();
+				int numEntries2 = L2.numChildren();
+				// if it's still equal, resolve by default to L1
+				if (numEntries1 <= numEntries2) {
+					L1.add(chosenEntry);
+				} else {
+					L2.add(chosenEntry);
+				}
+			} else if (area1 < area1) {
+				L1.add(chosenEntry);
+			} else {
+				L2.add(chosenEntry);
+			}
+		} else if (enlargementL1 < enlargementL2) {
+			L1.add(chosenEntry);
+		} else {
+			L2.add(chosenEntry);
+		}
 	}
 
 	public void adjustTree(Node<T> node, Node<T> createdNode) {
@@ -93,8 +194,9 @@ public final class Rtree<T extends Boundable> {
 			if (P.numChildren() < this.max_num_records && NN != null) {
 				P.add(NN);
 			} else if (NN != null) {
-				Node<T> PP = this.quadraticSplit(P, NN);
-				NN.setParent(PP);
+				Pair<Node<T>, Node<T>> splittedParents = this.quadraticSplit(P, NN);
+				Node<T> PP = splittedParents.getSecond();
+				PP.add(NN);
 				NN = PP;
 			}
 			N = P;
@@ -102,8 +204,8 @@ public final class Rtree<T extends Boundable> {
 
 	}
 
-	public void delete(Record<T> record) {
-
+	public boolean delete(Record<T> record) {
+		return false;
 	}
 
 	Record<T> search(Record<T> record) {
