@@ -23,4 +23,14 @@ public final class Record<T extends Boundable> {
 	public Rectangle getMbr() {
 		return this.value.getMbr();
 	}
+
+	public String toString() {
+		StringBuilder strBuilder = new StringBuilder();
+		strBuilder.append("Record(");
+		if (this.identifier != null) {
+			strBuilder.append("ID=" + this.identifier);
+		}
+		strBuilder.append(", value=" + this.value.toString() + ")");
+		return strBuilder.toString();
+	}
 }

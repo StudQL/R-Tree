@@ -19,6 +19,7 @@ public class Node<T extends Boundable> {
 	}
 
 	public Node(Node<T> child) {
+		this.children = new ArrayList<Node<T>>();
 		this.add(child);
 		this.mbr = child.getMbr();
 	}
@@ -77,6 +78,7 @@ public class Node<T extends Boundable> {
 	public void add(Node<T> node) {
 		this.children.add(node);
 		node.setParent(this);
+		this.updateMbr();
 	}
 
 	public void add(List<Node<T>> nodes) {
@@ -85,26 +87,43 @@ public class Node<T extends Boundable> {
 		}
 	}
 
+	public void remove(Node<T> node) {
+		this.children.remove(node);
+		node.setParent(null);
+		this.updateMbr();
+	}
+
 	public boolean delete(Node<T> node) {
 		return this.children.remove(node);
 	}
 
-	public void updateMbr() {
-		float minX = Float.MAX_VALUE;
-		float minY = minX;
-		float maxX = Float.MIN_VALUE;
-		float maxY = maxX;
-		for (Node<T> child : this.children) {
-			Rectangle childMbr = child.getMbr();
-			ArrayList<Float> mbrLimitDimensions = Rectangle.getMinMaxDimensions(childMbr);
-			minX = Math.min(minX, mbrLimitDimensions.get(0));
-			maxX = Math.max(maxX, mbrLimitDimensions.get(1));
-			minY = Math.min(minY, mbrLimitDimensions.get(2));
-			maxY = Math.max(maxY, mbrLimitDimensions.get(3));
+	public String toString(String padding) {
+		StringBuilder strBuilder = new StringBuilder();
+		strBuilder.append(padding + "Node(");
+		if (this.isLeaf() && this.record != null)
+			strBuilder.append("record=" + this.record.toString() + ")");
+		else {
+			if (this.mbr != null) {
+				strBuilder.append("mbr=" + this.mbr.toString() + ")\n");
+			}
+			for (Node<T> child : this.children) {
+				strBuilder.append(child.toString(padding + "  "));
+			}
 		}
-		Rectangle newMbr = new Rectangle(minX, maxX, minY, maxY);
-		if (newMbr != this.mbr) {
-			this.setMbr(newMbr);
+		strBuilder.append("\n");
+		return strBuilder.toString();
+	}
+
+	public void updateMbr() {
+		Rectangle enclosing = this.mbr;
+		for (Node<T> child : this.children) {
+			if (enclosing != null)
+				enclosing = Rectangle.buildRectangle(enclosing, child.getMbr());
+			else
+				enclosing = child.getMbr();
+		}
+		if (enclosing != this.mbr) {
+			this.setMbr(enclosing);
 		}
 	}
 }

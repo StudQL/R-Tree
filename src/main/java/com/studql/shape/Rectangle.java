@@ -95,14 +95,13 @@ public final class Rectangle implements Boundable {
 	}
 
 	public float calculateEnlargement(Rectangle r) {
-		float enlargement = 0;
-		ArrayList<Float> minInstanceDimensions = getMinMaxDimensions(this);
-		ArrayList<Float> minRectDimensions = getMinMaxDimensions(r);
-		enlargement += Math.max(minInstanceDimensions.get(0) - minRectDimensions.get(0), 0);
-		enlargement += Math.max(minRectDimensions.get(1) - minInstanceDimensions.get(1), 0);
-		enlargement += Math.max(minInstanceDimensions.get(2) - minRectDimensions.get(2), 0);
-		enlargement += Math.max(minRectDimensions.get(3) - minInstanceDimensions.get(3), 0);
-		return enlargement;
+		Rectangle overlappingRectangle = Rectangle.buildRectangle(this, r);
+		return overlappingRectangle.area() - this.area();
+	}
+
+	public String toString() {
+		return "[" + this.bottomLeft.getX() + ", " + this.bottomRight.getX() + ", " + this.bottomLeft.getY() + ", "
+				+ this.topLeft.getY() + "]";
 	}
 
 }

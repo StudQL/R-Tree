@@ -19,7 +19,7 @@ public class Main {
 				add(new Record<Rectangle>(new Rectangle(5, 6, 1, 2), "4"));
 				add(new Record<Rectangle>(new Rectangle(8, 9, 2, 4), "5"));
 				add(new Record<Rectangle>(new Rectangle(10, 11, 4, 5), "6"));
-				add(new Record<Rectangle>(new Rectangle(13, 14, 2, 3), "7"));
+				add(new Record<Rectangle>(new Rectangle(1, 2, 4, 6), "7"));
 				add(new Record<Rectangle>(new Rectangle(12, 13, 1, 2), "8"));
 			}
 		};
