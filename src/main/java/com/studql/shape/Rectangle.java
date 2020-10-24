@@ -1,7 +1,5 @@
 package src.main.java.com.studql.shape;
 
-import java.util.ArrayList;
-
 public final class Rectangle implements Boundable {
 	private final Point topLeft;
 	private final Point bottomRight;
@@ -45,28 +43,8 @@ public final class Rectangle implements Boundable {
 		return this.bottomLeft;
 	}
 
-	@SuppressWarnings("serial")
-	public static ArrayList<Float> getMinMaxDimensions(Rectangle r) {
-		float minX = r.topLeft.getX(), maxY = r.topLeft.getY();
-		float maxX = r.bottomRight.getX(), minY = r.bottomRight.getY();
-		return new ArrayList<Float>() {
-			{
-				add(minX);
-				add(maxX);
-				add(minY);
-				add(maxY);
-			}
-		};
-	}
-
-	public static Rectangle buildRectangle(Rectangle r1, Rectangle r2) {
-		ArrayList<Float> r1Limits = getMinMaxDimensions(r1);
-		ArrayList<Float> r2Limits = getMinMaxDimensions(r2);
-		float minX = Math.min(r1Limits.get(0), r2Limits.get(0));
-		float maxX = Math.max(r1Limits.get(1), r2Limits.get(1));
-		float minY = Math.min(r1Limits.get(2), r2Limits.get(2));
-		float maxY = Math.max(r1Limits.get(3), r2Limits.get(3));
-		return new Rectangle(minX, maxX, minY, maxY);
+	public Rectangle getMbr() {
+		return this;
 	}
 
 	@Override
@@ -82,17 +60,27 @@ public final class Rectangle implements Boundable {
 				&& r.bottomRight == this.bottomRight;
 	}
 
-	public Rectangle getMbr() {
-		return this;
+	private static Float[] getMinMaxDimensions(Rectangle r) {
+		float minX = r.topLeft.getX(), maxY = r.topLeft.getY();
+		float maxX = r.bottomRight.getX(), minY = r.bottomRight.getY();
+		return new Float[] { minX, maxX, minY, maxY };
+	}
+
+	public static Rectangle buildRectangle(Rectangle r1, Rectangle r2) {
+		Float[] r1Limits = getMinMaxDimensions(r1);
+		Float[] r2Limits = getMinMaxDimensions(r2);
+		float minX = Math.min(r1Limits[0], r2Limits[0]);
+		float maxX = Math.max(r1Limits[1], r2Limits[1]);
+		float minY = Math.min(r1Limits[2], r2Limits[2]);
+		float maxY = Math.max(r1Limits[3], r2Limits[3]);
+		return new Rectangle(minX, maxX, minY, maxY);
 	}
 
 	public boolean contains(Rectangle r) {
-		ArrayList<Float> minInstanceDimensions = getMinMaxDimensions(this);
-		ArrayList<Float> minRectDimensions = getMinMaxDimensions(r);
-		return minInstanceDimensions.get(0) <= minRectDimensions.get(0)
-				&& minInstanceDimensions.get(1) >= minRectDimensions.get(1)
-				&& minInstanceDimensions.get(2) <= minRectDimensions.get(2)
-				&& minInstanceDimensions.get(3) >= minRectDimensions.get(3);
+		Float[] minInstanceDimensions = getMinMaxDimensions(this);
+		Float[] minRectDimensions = getMinMaxDimensions(r);
+		return minInstanceDimensions[0] <= minRectDimensions[0] && minInstanceDimensions[1] >= minRectDimensions[1]
+				&& minInstanceDimensions[2] <= minRectDimensions[2] && minInstanceDimensions[3] >= minRectDimensions[3];
 	}
 
 	public float area() {

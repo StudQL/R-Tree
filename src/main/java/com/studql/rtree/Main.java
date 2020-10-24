@@ -8,9 +8,10 @@ import src.main.java.com.studql.shape.Rectangle;
 public class Main {
 
 	public static void test_rectangles() {
-		int min_records = 2;
-		int max_records = 4;
-		Rtree<Rectangle> tree = new Rtree<Rectangle>(min_records, max_records);
+		int min_records = 1;
+		int max_records = 2;
+		Rtree<Rectangle> tree = new Rtree<Rectangle>(min_records, max_records,
+				new QuadraticSplitter<Rectangle>(min_records));
 
 		@SuppressWarnings("serial")
 		ArrayList<Record<Rectangle>> dataPoints = new ArrayList<Record<Rectangle>>() {
@@ -32,9 +33,9 @@ public class Main {
 	}
 
 	public static void test_points() {
-		int min_records = 1;
-		int max_records = 2;
-		Rtree<Point> tree = new Rtree<Point>(min_records, max_records);
+		int min_records = 2;
+		int max_records = 4;
+		Rtree<Point> tree = new Rtree<Point>(min_records, max_records, new QuadraticSplitter<Point>(min_records));
 
 		@SuppressWarnings("serial")
 		ArrayList<Record<Point>> dataPoints = new ArrayList<Record<Point>>() {

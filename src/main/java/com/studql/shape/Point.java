@@ -20,6 +20,10 @@ public final class Point implements Boundable {
 		return y;
 	}
 
+	public Rectangle getMbr() {
+		return this.mbr;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == this) {
@@ -30,10 +34,6 @@ public final class Point implements Boundable {
 		}
 		Point p = (Point) obj;
 		return p.x == this.x && p.y == this.y;
-	}
-
-	public Rectangle getMbr() {
-		return this.mbr;
 	}
 
 	public String toString() {

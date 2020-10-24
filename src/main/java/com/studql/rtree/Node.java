@@ -78,7 +78,7 @@ public class Node<T extends Boundable> {
 	public void add(Node<T> node) {
 		this.children.add(node);
 		node.setParent(this);
-		this.updateMbr();
+		this.updateMbr(node.getMbr(), true);
 	}
 
 	public void add(List<Node<T>> nodes) {
@@ -90,11 +90,7 @@ public class Node<T extends Boundable> {
 	public void remove(Node<T> node) {
 		this.children.remove(node);
 		node.setParent(null);
-		this.updateMbr();
-	}
-
-	public boolean delete(Node<T> node) {
-		return this.children.remove(node);
+		this.updateMbr(node.getMbr(), false);
 	}
 
 	public String toString(String padding) {
@@ -114,16 +110,27 @@ public class Node<T extends Boundable> {
 		return strBuilder.toString();
 	}
 
-	public void updateMbr() {
-		Rectangle enclosing = this.mbr;
-		for (Node<T> child : this.children) {
-			if (enclosing != null)
-				enclosing = Rectangle.buildRectangle(enclosing, child.getMbr());
-			else
-				enclosing = child.getMbr();
-		}
-		if (enclosing != this.mbr) {
-			this.setMbr(enclosing);
+	public void updateMbr(Rectangle childMbrChange, boolean isAddOperation) {
+		// if there is already a minimum bounding rectangle
+		if (this.mbr != null) {
+			Rectangle enclosing = null;
+			if (isAddOperation)
+				enclosing = Rectangle.buildRectangle(this.mbr, childMbrChange);
+			else {
+				// traverse all childs
+				for (Node<T> child : this.children) {
+					if (enclosing == null) {
+						enclosing = child.getMbr();
+					} else {
+						enclosing = Rectangle.buildRectangle(enclosing, child.getMbr());
+					}
+				}
+			}
+			if (enclosing != this.mbr) {
+				this.setMbr(enclosing);
+			}
+		} else {
+			this.setMbr(childMbrChange);
 		}
 	}
 }
