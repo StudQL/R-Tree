@@ -15,6 +15,13 @@ public final class Rectangle implements Boundable {
 		this.bottomLeft = new Point(topLeft.getX(), bottomRight.getY());
 	}
 
+	public Rectangle(Point unitPoint) {
+		this.topLeft = unitPoint;
+		this.topRight = unitPoint;
+		this.bottomLeft = unitPoint;
+		this.bottomRight = unitPoint;
+	}
+
 	public Rectangle(float minX, float maxX, float minY, float maxY) {
 		this.topLeft = new Point(minX, maxY);
 		this.bottomRight = new Point(maxX, minY);

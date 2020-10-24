@@ -104,8 +104,7 @@ public final class Rtree<T extends Boundable> {
 		records.remove(seeds.getSecond());
 		// examine remaining entries and add them to either L1 or L2 with the least
 		// enlargement criteria
-		int i = 0;
-		while (i < records.size()) {
+		while (records.size() > 0) {
 			// if one node must take all remaining entries, assign them with no criteria
 			if (L1.numChildren() + records.size() == this.min_num_records) {
 				L1.add(records);
@@ -117,7 +116,6 @@ public final class Rtree<T extends Boundable> {
 			}
 			// add the next record to the node which will require the least enlargement
 			this.pickNext(records, L1, L2);
-			i++;
 		}
 		return new Pair<Node<T>, Node<T>>(L1, L2);
 
@@ -133,13 +131,9 @@ public final class Rtree<T extends Boundable> {
 				Node<T> E2 = records.get(j);
 				// build rectangle that englobes E1 and E2
 				Rectangle J = Rectangle.buildRectangle(E1.getMbr(), E2.getMbr());
-//				System.out.println(J.toString());
 				float d = J.area() - E1.getMbr().area() - E2.getMbr().area();
-//				System.out.println(J.area());
-//				System.out.println(E1.getMbr().area());
-//				System.out.println(E2.getMbr().area());
 				// chose most wasteful pair
-				if (d > maxWaste) {
+				if (d >= maxWaste) {
 					maxWaste = d;
 					wastefulePair = new Pair<Node<T>, Node<T>>(E1, E2);
 				}

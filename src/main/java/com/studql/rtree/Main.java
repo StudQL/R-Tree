@@ -2,14 +2,16 @@ package src.main.java.com.studql.rtree;
 
 import java.util.ArrayList;
 
+import src.main.java.com.studql.shape.Point;
 import src.main.java.com.studql.shape.Rectangle;
 
 public class Main {
 
-	public static void main(String[] args) {
-		int min_records = 1;
-		int max_records = 2;
+	public static void test_rectangles() {
+		int min_records = 2;
+		int max_records = 4;
 		Rtree<Rectangle> tree = new Rtree<Rectangle>(min_records, max_records);
+
 		@SuppressWarnings("serial")
 		ArrayList<Record<Rectangle>> dataPoints = new ArrayList<Record<Rectangle>>() {
 			{
@@ -19,7 +21,7 @@ public class Main {
 				add(new Record<Rectangle>(new Rectangle(5, 6, 1, 2), "4"));
 				add(new Record<Rectangle>(new Rectangle(8, 9, 2, 4), "5"));
 				add(new Record<Rectangle>(new Rectangle(10, 11, 4, 5), "6"));
-				add(new Record<Rectangle>(new Rectangle(1, 2, 4, 6), "7"));
+				add(new Record<Rectangle>(new Rectangle(13, 14, 2, 3), "7"));
 				add(new Record<Rectangle>(new Rectangle(12, 13, 1, 2), "8"));
 			}
 		};
@@ -27,6 +29,38 @@ public class Main {
 			tree.insert(r);
 		}
 		System.out.println(tree.toString());
+	}
+
+	public static void test_points() {
+		int min_records = 1;
+		int max_records = 2;
+		Rtree<Point> tree = new Rtree<Point>(min_records, max_records);
+
+		@SuppressWarnings("serial")
+		ArrayList<Record<Point>> dataPoints = new ArrayList<Record<Point>>() {
+			{
+				add(new Record<Point>(new Point(1, 2), "1"));
+				add(new Record<Point>(new Point(3, 4), "2"));
+				add(new Record<Point>(new Point(5, 2), "3"));
+				add(new Record<Point>(new Point(6, 3), "4"));
+				add(new Record<Point>(new Point(7, 5), "5"));
+				add(new Record<Point>(new Point(8, 4), "6"));
+				add(new Record<Point>(new Point(9, 2), "7"));
+				add(new Record<Point>(new Point(10, 5), "8"));
+				add(new Record<Point>(new Point(11, 3), "9"));
+				add(new Record<Point>(new Point(12, 1), "10"));
+				add(new Record<Point>(new Point(13, 2), "11"));
+				add(new Record<Point>(new Point(4, 3), "12"));
+			}
+		};
+		for (Record<Point> r : dataPoints) {
+			tree.insert(r);
+		}
+		System.out.println(tree.toString());
+	}
+
+	public static void main(String[] args) {
+		test_points();
 	}
 
 }
