@@ -78,7 +78,7 @@ public class Node<T extends Boundable> {
 	public void add(Node<T> node) {
 		this.children.add(node);
 		node.setParent(this);
-		this.updateMbr(node.getMbr(), true);
+		this.updateMbr(node.getMbr());
 	}
 
 	public void add(List<Node<T>> nodes) {
@@ -90,31 +90,33 @@ public class Node<T extends Boundable> {
 	public void remove(Node<T> node) {
 		this.children.remove(node);
 		node.setParent(null);
-		this.updateMbr(node.getMbr(), false);
+		this.updateMbr(null);
 	}
 
 	public String toString(String padding) {
 		StringBuilder strBuilder = new StringBuilder();
-		strBuilder.append(padding + "Node(");
-		if (this.isLeaf() && this.record != null)
-			strBuilder.append("record=" + this.record.toString() + ")");
-		else {
-			if (this.mbr != null) {
+		if (this.mbr != null || this.record != null) {
+			strBuilder.append(padding + "Node(");
+			if (this.record != null) {
+				strBuilder.append("record=" + this.record.toString() + ")");
+			} else {
 				strBuilder.append("mbr=" + this.mbr.toString() + ")\n");
+				for (Node<T> child : this.children) {
+					strBuilder.append(child.toString(padding + "  "));
+				}
 			}
-			for (Node<T> child : this.children) {
-				strBuilder.append(child.toString(padding + "  "));
-			}
+			strBuilder.append("\n");
+		} else {
+			strBuilder.append("Node is null\n");
 		}
-		strBuilder.append("\n");
 		return strBuilder.toString();
 	}
 
-	public void updateMbr(Rectangle childMbrChange, boolean isAddOperation) {
+	public void updateMbr(Rectangle childMbrChange) {
 		// if there is already a minimum bounding rectangle
 		if (this.mbr != null) {
 			Rectangle enclosing = null;
-			if (isAddOperation)
+			if (childMbrChange != null)
 				enclosing = Rectangle.buildRectangle(this.mbr, childMbrChange);
 			else {
 				// traverse all childs

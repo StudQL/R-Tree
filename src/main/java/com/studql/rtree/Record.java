@@ -24,6 +24,19 @@ public final class Record<T extends Boundable> {
 		return this.value.getMbr();
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (obj == null || obj.getClass() != this.getClass()) {
+			return false;
+		}
+		Record<T> r = (Record<T>) obj;
+		return r.getValue().equals(this.value);
+	}
+
 	public String toString() {
 		StringBuilder strBuilder = new StringBuilder();
 		strBuilder.append("Record(");

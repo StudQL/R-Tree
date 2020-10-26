@@ -1,9 +1,12 @@
 package src.main.java.com.studql.rtree;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import src.main.java.com.studql.shape.Point;
 import src.main.java.com.studql.shape.Rectangle;
+import src.main.java.com.studql.utils.Visualizer;
 
 public class Main {
 
@@ -22,7 +25,7 @@ public class Main {
 				add(new Record<Rectangle>(new Rectangle(5, 6, 1, 2), "4"));
 				add(new Record<Rectangle>(new Rectangle(8, 9, 2, 4), "5"));
 				add(new Record<Rectangle>(new Rectangle(10, 11, 4, 5), "6"));
-				add(new Record<Rectangle>(new Rectangle(13, 14, 2, 3), "7"));
+				add(new Record<Rectangle>(new Rectangle(13, 15, 2, 3), "7"));
 				add(new Record<Rectangle>(new Rectangle(12, 13, 1, 2), "8"));
 			}
 		};
@@ -30,6 +33,20 @@ public class Main {
 			tree.insert(r);
 		}
 		System.out.println(tree.toString());
+
+		Visualizer<Rectangle> v = new Visualizer<Rectangle>();
+		try {
+			v.createVisualization(tree, new File("C:\\Users\\alzajac\\Downloads\\test.png"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+//		for (Record<Rectangle> r : dataPoints) {
+//			tree.delete(r);
+//			System.out.println(tree.toString());
+//		}
+
 	}
 
 	public static void test_points() {
@@ -61,7 +78,7 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
-		test_points();
+		test_rectangles();
 	}
 
 }

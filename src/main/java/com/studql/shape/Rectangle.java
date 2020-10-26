@@ -56,8 +56,8 @@ public final class Rectangle implements Boundable {
 			return false;
 		}
 		Rectangle r = (Rectangle) obj;
-		return r.topLeft == this.topLeft && r.topRight == this.topRight && r.bottomLeft == this.bottomLeft
-				&& r.bottomRight == this.bottomRight;
+		return r.topLeft.equals(this.topLeft) && r.topRight.equals(this.topRight)
+				&& r.bottomLeft.equals(this.bottomLeft) && r.bottomRight.equals(this.bottomRight);
 	}
 
 	private static Float[] getMinMaxDimensions(Rectangle r) {

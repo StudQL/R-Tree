@@ -44,6 +44,10 @@ public final class Rtree<T extends Boundable> {
 		return this.max_num_records;
 	}
 
+	public Node<T> getRoot() {
+		return this.root;
+	}
+
 	public void insert(Record<T> record) {
 		Rectangle recordMbr = record.getMbr();
 		// choose leaf that needs the least enlargement with mbr
@@ -52,9 +56,9 @@ public final class Rtree<T extends Boundable> {
 		// if node has enough space to insert the child
 		if (leaf.numChildren() < this.max_num_records) {
 			leaf.add(newNode);
-			this.adjustTree(leaf, null, true);
+			this.adjustTree(leaf, null);
 		} else {
-			this.splitNodeAndReassign(leaf, newNode, true);
+			this.splitNodeAndReassign(leaf, newNode);
 		}
 		System.out.println(this.toString());
 		this.num_entries += 1;
@@ -93,7 +97,7 @@ public final class Rtree<T extends Boundable> {
 		return this.chooseLeaf(recordMbr, minAreaRecord);
 	}
 
-	private void adjustTree(Node<T> node, Node<T> createdNode, boolean isAddOperation) {
+	private void adjustTree(Node<T> node, Node<T> createdNode) {
 		Node<T> previousNode = node;
 		// node resulting from split
 		Node<T> splittedNode = createdNode;
@@ -102,18 +106,18 @@ public final class Rtree<T extends Boundable> {
 			Node<T> previousParent = previousNode.getParent();
 			// updating parent recursively in the no-split case
 			if (splittedNode == null) {
-				previousParent.updateMbr(previousNode.getMbr(), isAddOperation);
-				this.adjustTree(previousParent, splittedNode, isAddOperation);
+				previousParent.updateMbr(previousNode.getMbr());
+				this.adjustTree(previousParent, splittedNode);
 			}
 			// see if there is a node overflow, and update accrodingly
 			else if (previousParent.numChildren() > this.max_num_records) {
 				previousParent.remove(splittedNode);
-				this.splitNodeAndReassign(previousParent, splittedNode, isAddOperation);
+				this.splitNodeAndReassign(previousParent, splittedNode);
 			}
 		}
 	}
 
-	private void splitNodeAndReassign(Node<T> nodeToSplit, Node<T> overflowNode, boolean isAddOperation) {
+	private void splitNodeAndReassign(Node<T> nodeToSplit, Node<T> overflowNode) {
 		Pair<Node<T>, Node<T>> splittedNodes = this.splitter.splitNodes(nodeToSplit, overflowNode);
 		Node<T> splittedLeft = splittedNodes.getFirst(), splittedRight = splittedNodes.getSecond();
 		if (nodeToSplit == this.root)
@@ -123,7 +127,7 @@ public final class Rtree<T extends Boundable> {
 			splittedParent.remove(nodeToSplit);
 			splittedParent.add(splittedLeft);
 			splittedParent.add(splittedRight);
-			this.adjustTree(splittedLeft, splittedRight, isAddOperation);
+			this.adjustTree(splittedLeft, splittedRight);
 		}
 	}
 
@@ -136,9 +140,65 @@ public final class Rtree<T extends Boundable> {
 
 	public boolean delete(Record<T> record) {
 		// choose leaf that contains record
-
+		Node<T> leaf = this.findLeafAndRemove(record, this.root);
+		if (leaf == null)
+			return false;
+		this.condenseTree(leaf);
+		// if root needs to be reassigned
+		if (this.root.numChildren() == 1 && !this.root.isLeaf()) {
+			Node<T> newRoot = this.root.getChildren().get(0);
+			newRoot.setParent(null);
+			this.root = newRoot;
+		}
 		this.num_entries -= 1;
 		return true;
+	}
+
+	private Node<T> findLeafAndRemove(Record<T> record, Node<T> node) {
+		if (!node.isLeaf()) {
+			// perform DFS of child nodes
+			for (Node<T> child : node.getChildren()) {
+				if (child.getMbr().contains(record.getMbr())) {
+					Node<T> foundLeaf = this.findLeafAndRemove(record, child);
+					if (foundLeaf != null) {
+						return foundLeaf;
+					}
+				}
+			}
+		} else {
+			// node is leaf, checking all its records
+			for (Node<T> child : node.getChildren()) {
+				Record<T> childRecord = child.getRecord();
+				if (childRecord.equals(record)) {
+					node.remove(child);
+					return node;
+				}
+			}
+		}
+		return null;
+	}
+
+	private void condenseTree(Node<T> leaf) {
+		Node<T> N = leaf;
+		ArrayList<Node<T>> removedEntries = new ArrayList<Node<T>>();
+		if (!N.isRoot()) {
+			Node<T> P = N.getParent();
+			// N has underflow of childs
+			if (N.numChildren() < this.min_num_records) {
+				P.remove(N);
+				// we will reinsert remaining entries if they have at least one child
+				if (N.numChildren() > 0)
+					removedEntries.add(N);
+			} else {
+				N.updateMbr(null);
+			}
+			// update parent recursively
+			this.condenseTree(P);
+		}
+		// reinsert temporarily deleted entries
+		for (Node<T> deletedChild : removedEntries) {
+			this.insert(deletedChild.getRecord());
+		}
 	}
 
 	Record<T> search(Record<T> record) {
