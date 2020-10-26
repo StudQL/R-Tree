@@ -30,6 +30,15 @@ public class Main {
 			tree.insert(r);
 		}
 		System.out.println(tree.toString());
+		Rectangle rec = new Rectangle(1, 14, 4, 5);
+		Record<Rectangle> rec2 = new Record<Rectangle>(new Rectangle(12, 13, 1, 2), "");
+		ArrayList<Record<Rectangle>> testo = tree.rangeSearch(tree.getRoot(), rec);
+		ArrayList<Record<Rectangle>> rec3 = tree.search(tree.getRoot(), rec2);
+		System.out.println("Rectangles:" + testo);
+		System.out.println("Rectangle:" + rec3);
+		System.out.println("taille : " + tree.calculateHeight());
+
+
 	}
 
 	public static void test_points() {
@@ -58,10 +67,19 @@ public class Main {
 			tree.insert(r);
 		}
 		System.out.println(tree.toString());
+		Rectangle rec = new Rectangle(1, 14, 4, 5);
+		Record<Point> pt = new Record<Point>(new Point(4, 3), "");
+		ArrayList<Record<Point>> testo = tree.rangeSearch(tree.getRoot(), rec);
+		ArrayList<Record<Point>> point = tree.search(tree.getRoot(), pt);
+		System.out.println("Points:" + testo);
+		System.out.println("Point:" + point);
+		System.out.println("taille : " + tree.calculateHeight());
 	}
 
 	public static void main(String[] args) {
+		//test_rectangles();
 		test_points();
+		
 	}
 
 }
