@@ -23,7 +23,8 @@ public class QuadraticSplitter<T extends Boundable> extends NodeSplitter<T> {
 				Node<T> E2 = records.get(j);
 				// build rectangle that englobes E1 and E2
 				Rectangle enclosingRectangle = Rectangle.buildRectangle(E1.getMbr(), E2.getMbr());
-				float d = enclosingRectangle.area() - E1.getMbr().area() - E2.getMbr().area();
+				Rectangle E1Mbr = E1.getMbr(), E2Mbr = E2.getMbr();
+				float d = enclosingRectangle.area() - (E1Mbr.area() + E2Mbr.area()) + E1Mbr.intersectArea(E2Mbr);
 				// chose most wasteful pair
 				if (d >= maxWaste) {
 					maxWaste = d;

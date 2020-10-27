@@ -3,9 +3,13 @@ package src.main.java.com.studql.rtree;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
 
 import src.main.java.com.studql.shape.Point;
 import src.main.java.com.studql.shape.Rectangle;
+import src.main.java.com.studql.utils.Benchmark;
 import src.main.java.com.studql.utils.Visualizer;
 
 public class Main {
@@ -75,10 +79,34 @@ public class Main {
 			tree.insert(r);
 		}
 		System.out.println(tree.toString());
+
+		Visualizer<Point> v = new Visualizer<Point>();
+		try {
+			v.createVisualization(tree, new File("C:\\Users\\alzajac\\Downloads\\test.png"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+//		for (Record<Point> r : dataPoints) {
+//			tree.delete(r);
+//			System.out.println(tree.toString());
+//		}
 	}
 
 	public static void main(String[] args) {
-		test_rectangles();
+//		test_rectangles();
+		Benchmark b = new Benchmark();
+//		int n = 10000;
+//		int[] xRange = new int[] { 0, 400 };
+//		int[] yRange = new int[] { 0, 600 };
+		int[] page_sizes = new int[] { 6, 12, 25, 50, 102 };
+		List<Function<Integer, Integer>> min_page_operators = Arrays.asList(num -> Math.round(num) / 3,
+				num -> Math.round(num) / 2, num -> 2);
+		boolean shouldVisualize = true;
+		String fileLocation = "C:\\Users\\alzajac\\Downloads\\1000.txt";
+//		b.benchmarkInsertWithRandomRectangles(n, xRange, yRange, page_sizes, min_page_operators, shouldVisualize);
+		b.benchmarkInsertWithDatasetPoints(fileLocation, page_sizes, min_page_operators, shouldVisualize);
 	}
 
 }

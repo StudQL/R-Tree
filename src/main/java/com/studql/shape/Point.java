@@ -1,6 +1,10 @@
 package src.main.java.com.studql.shape;
 
+import java.awt.Shape;
+import java.awt.geom.Ellipse2D;
+
 public final class Point implements Boundable {
+	private static final int DRAW_SIZE = 3;
 	private final float x;
 	private final float y;
 	// mbr for point is just a unit rectangle
@@ -38,6 +42,10 @@ public final class Point implements Boundable {
 
 	public String toString() {
 		return "[" + this.x + ", " + this.y + "]";
+	}
+
+	public Shape draw(float dim1, float dim2, float dim3, float dim4) {
+		return new Ellipse2D.Float(dim1 - DRAW_SIZE, dim2 - DRAW_SIZE, DRAW_SIZE * 2, DRAW_SIZE * 2);
 	}
 
 }

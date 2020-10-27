@@ -1,5 +1,8 @@
 package src.main.java.com.studql.shape;
 
+import java.awt.Shape;
+import java.awt.geom.Rectangle2D;
+
 public final class Rectangle implements Boundable {
 	private final Point topLeft;
 	private final Point bottomRight;
@@ -89,6 +92,20 @@ public final class Rectangle implements Boundable {
 		return length * height;
 	}
 
+	public float intersectArea(Rectangle r) {
+		float farthestLeft = Math.max(r.getTopLeft().getX(), this.getTopLeft().getX());
+		float nearestRight = Math.min(r.getTopRight().getX(), this.getTopRight().getX());
+		float length = nearestRight - farthestLeft;
+		if (length <= 0)
+			return 0;
+		float farthestBottom = Math.max(r.getBottomLeft().getY(), this.getBottomLeft().getY());
+		float nearestTop = Math.min(r.getTopLeft().getY(), this.getTopLeft().getY());
+		float height = nearestTop - farthestBottom;
+		if (height <= 0)
+			return 0;
+		return length * height;
+	}
+
 	public float calculateEnlargement(Rectangle r) {
 		Rectangle overlappingRectangle = Rectangle.buildRectangle(this, r);
 		return overlappingRectangle.area() - this.area();
@@ -97,6 +114,10 @@ public final class Rectangle implements Boundable {
 	public String toString() {
 		return "[" + this.bottomLeft.getX() + ", " + this.bottomRight.getX() + ", " + this.bottomLeft.getY() + ", "
 				+ this.topLeft.getY() + "]";
+	}
+
+	public Shape draw(float dim1, float dim2, float dim3, float dim4) {
+		return new Rectangle2D.Float(dim1, dim2, dim3, dim4);
 	}
 
 }

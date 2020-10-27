@@ -60,7 +60,6 @@ public final class Rtree<T extends Boundable> {
 		} else {
 			this.splitNodeAndReassign(leaf, newNode);
 		}
-		System.out.println(this.toString());
 		this.num_entries += 1;
 	}
 
@@ -197,7 +196,18 @@ public final class Rtree<T extends Boundable> {
 		}
 		// reinsert temporarily deleted entries
 		for (Node<T> deletedChild : removedEntries) {
-			this.insert(deletedChild.getRecord());
+			this.insertFromNode(deletedChild);
+		}
+	}
+
+	private void insertFromNode(Node<T> node) {
+		if (node.getChildren() != null) {
+			for (Node<T> child : node.getChildren()) {
+				if (child.getRecord() != null)
+					this.insert(child.getRecord());
+				else
+					this.insertFromNode(child);
+			}
 		}
 	}
 
@@ -216,6 +226,6 @@ public final class Rtree<T extends Boundable> {
 	}
 
 	public int calculateHeight() {
-		return 0;
+		return 5;
 	}
 }
