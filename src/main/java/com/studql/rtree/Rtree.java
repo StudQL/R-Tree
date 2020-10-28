@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import src.main.java.com.studql.shape.Boundable;
+import src.main.java.com.studql.shape.Point;
 import src.main.java.com.studql.shape.Rectangle;
 
 public final class Rtree<T extends Boundable> {
@@ -60,6 +61,7 @@ public final class Rtree<T extends Boundable> {
 		} else {
 			this.splitNodeAndReassign(leaf, newNode);
 		}
+		System.out.println(this.toString());
 		this.num_entries += 1;
 	}
 
@@ -108,7 +110,7 @@ public final class Rtree<T extends Boundable> {
 				previousParent.updateMbr(previousNode.getMbr());
 				this.adjustTree(previousParent, splittedNode);
 			}
-			// see if there is a node overflow, and update accrodingly
+			// see if there is a node overflow, and update accordingly
 			else if (previousParent.numChildren() > this.max_num_records) {
 				previousParent.remove(splittedNode);
 				this.splitNodeAndReassign(previousParent, splittedNode);
@@ -211,12 +213,41 @@ public final class Rtree<T extends Boundable> {
 		}
 	}
 
-	Record<T> search(Record<T> record) {
-		return null;
+	public ArrayList<Record<T>> search(Node<T> R, Record<T> record) {
+		Rectangle rec = record.getMbr();
+		ArrayList<Record<T>> result = new ArrayList<Record<T>>();
+		if (!R.isLeaf()) {
+			List<Node<T>> temp = R.getChildren();
+			for(Node<T> n : temp) {
+				if(n.getMbr().isOverLapping(rec))
+					result.addAll(rangeSearch(n, rec));
+			}
+		}else {
+			List<Node<T>> temp = R.getChildren();
+			for(Node<T> n : temp) {
+				if(record.equals(n.getRecord()))
+					result.add(n.getRecord());
+			}
+		}
+		return result;
 	}
 
-	List<Record<T>> rangeSearch(Rectangle r) {
-		return null;
+	public ArrayList<Record<T>> rangeSearch(Node<T> R, Rectangle rec) {
+		ArrayList<Record<T>> result = new ArrayList<Record<T>>();
+		if (!R.isLeaf()) {
+			List<Node<T>> temp = R.getChildren();
+			for(Node<T> n : temp) {
+				if(n.getMbr().isOverLapping(rec))
+					result.addAll(rangeSearch(n, rec));
+			}
+		}else {
+			List<Node<T>> temp = R.getChildren();
+			for(Node<T> n : temp) {
+				if(rec.contains(n.getMbr()))
+					result.add(n.getRecord());
+			}
+		}
+		return result;
 	}
 
 	public String toString() {
@@ -226,6 +257,18 @@ public final class Rtree<T extends Boundable> {
 	}
 
 	public int calculateHeight() {
-		return 5;
+		int height = 0;
+		if(this.root == null) {
+			return height;
+		}else {
+			height += 1;
+			Node<T> R = this.root;
+			while(!R.isLeaf()){
+				height += 1;
+				R = R.getChildren().get(0);
+			}
+			height += 1;
+		}
+		return height;
 	}
 }

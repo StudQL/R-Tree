@@ -50,7 +50,6 @@ public class Main {
 //			tree.delete(r);
 //			System.out.println(tree.toString());
 //		}
-
 	}
 
 	public static void test_points() {
@@ -107,6 +106,12 @@ public class Main {
 		String fileLocation = "C:\\Users\\alzajac\\Downloads\\1000.txt";
 //		b.benchmarkInsertWithRandomRectangles(n, xRange, yRange, page_sizes, min_page_operators, shouldVisualize);
 		b.benchmarkInsertWithDatasetPoints(fileLocation, page_sizes, min_page_operators, shouldVisualize);
+	}
+
+	public static void main(String[] args) {
+		//test_rectangles();
+		test_points();
+	
 	}
 
 }

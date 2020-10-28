@@ -85,6 +85,16 @@ public final class Rectangle implements Boundable {
 		return minInstanceDimensions[0] <= minRectDimensions[0] && minInstanceDimensions[1] >= minRectDimensions[1]
 				&& minInstanceDimensions[2] <= minRectDimensions[2] && minInstanceDimensions[3] >= minRectDimensions[3];
 	}
+	
+	public boolean isOverLapping(Rectangle r) { 
+		if (this.topLeft.getX() > r.bottomRight.getX() // this is right to r 
+		|| this.bottomRight.getX() < r.topLeft.getX() // this is left to r 
+		|| this.topLeft.getY() < r.bottomRight.getY() // this is above r 
+		|| this.bottomRight.getY() > r.topLeft.getY()) { // this is below r 
+		return false; 
+		} 
+		return true; 
+    }
 
 	public float area() {
 		float length = this.topRight.getX() - this.topLeft.getX();
