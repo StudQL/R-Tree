@@ -108,10 +108,4 @@ public class Main {
 		b.benchmarkInsertWithDatasetPoints(fileLocation, page_sizes, min_page_operators, shouldVisualize);
 	}
 
-	public static void main(String[] args) {
-		//test_rectangles();
-		test_points();
-	
-	}
-
 }

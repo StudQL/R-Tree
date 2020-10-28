@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import src.main.java.com.studql.shape.Boundable;
-import src.main.java.com.studql.shape.Point;
 import src.main.java.com.studql.shape.Rectangle;
 
 public final class Rtree<T extends Boundable> {
@@ -61,7 +60,7 @@ public final class Rtree<T extends Boundable> {
 		} else {
 			this.splitNodeAndReassign(leaf, newNode);
 		}
-		System.out.println(this.toString());
+//		System.out.println(this.toString());
 		this.num_entries += 1;
 	}
 
@@ -218,14 +217,14 @@ public final class Rtree<T extends Boundable> {
 		ArrayList<Record<T>> result = new ArrayList<Record<T>>();
 		if (!R.isLeaf()) {
 			List<Node<T>> temp = R.getChildren();
-			for(Node<T> n : temp) {
-				if(n.getMbr().isOverLapping(rec))
+			for (Node<T> n : temp) {
+				if (n.getMbr().isOverLapping(rec))
 					result.addAll(rangeSearch(n, rec));
 			}
-		}else {
+		} else {
 			List<Node<T>> temp = R.getChildren();
-			for(Node<T> n : temp) {
-				if(record.equals(n.getRecord()))
+			for (Node<T> n : temp) {
+				if (record.equals(n.getRecord()))
 					result.add(n.getRecord());
 			}
 		}
@@ -236,14 +235,14 @@ public final class Rtree<T extends Boundable> {
 		ArrayList<Record<T>> result = new ArrayList<Record<T>>();
 		if (!R.isLeaf()) {
 			List<Node<T>> temp = R.getChildren();
-			for(Node<T> n : temp) {
-				if(n.getMbr().isOverLapping(rec))
+			for (Node<T> n : temp) {
+				if (n.getMbr().isOverLapping(rec))
 					result.addAll(rangeSearch(n, rec));
 			}
-		}else {
+		} else {
 			List<Node<T>> temp = R.getChildren();
-			for(Node<T> n : temp) {
-				if(rec.contains(n.getMbr()))
+			for (Node<T> n : temp) {
+				if (rec.contains(n.getMbr()))
 					result.add(n.getRecord());
 			}
 		}
@@ -258,12 +257,12 @@ public final class Rtree<T extends Boundable> {
 
 	public int calculateHeight() {
 		int height = 0;
-		if(this.root == null) {
+		if (this.root == null) {
 			return height;
-		}else {
+		} else {
 			height += 1;
 			Node<T> R = this.root;
-			while(!R.isLeaf()){
+			while (!R.isLeaf()) {
 				height += 1;
 				R = R.getChildren().get(0);
 			}
