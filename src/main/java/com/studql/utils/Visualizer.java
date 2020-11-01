@@ -9,8 +9,8 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import src.main.java.com.studql.rtree.Node;
 import src.main.java.com.studql.rtree.Rtree;
+import src.main.java.com.studql.rtree.node.Node;
 import src.main.java.com.studql.shape.Boundable;
 import src.main.java.com.studql.shape.Point;
 import src.main.java.com.studql.shape.Rectangle;
