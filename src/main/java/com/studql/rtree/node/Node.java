@@ -1,10 +1,14 @@
-package src.main.java.com.studql.rtree;
+package src.main.java.com.studql.rtree.node;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import src.main.java.com.studql.shape.Boundable;
 import src.main.java.com.studql.shape.Rectangle;
+import src.main.java.com.studql.utils.Record;
 
 public class Node<T extends Boundable> {
 	private Rectangle mbr = null;
@@ -13,6 +17,7 @@ public class Node<T extends Boundable> {
 	// their child only have a record value
 	private List<Node<T>> children = null;
 	private Record<T> record = null;
+	private ReadWriteLock lock = new ReentrantReadWriteLock();
 
 	public Node() {
 		this.children = new ArrayList<Node<T>>();
@@ -27,6 +32,14 @@ public class Node<T extends Boundable> {
 	public Node(Record<T> record) {
 		this.record = record;
 		this.mbr = record.getMbr();
+	}
+
+	public Lock getReadLock() {
+		return this.lock.readLock();
+	}
+
+	public Lock getWriteLock() {
+		return this.lock.readLock();
 	}
 
 	public Rectangle getMbr() {
@@ -91,6 +104,11 @@ public class Node<T extends Boundable> {
 		this.children.remove(node);
 		node.setParent(null);
 		this.updateMbr(null);
+	}
+
+	@Override
+	public String toString() {
+		return this.toString("");
 	}
 
 	public String toString(String padding) {
