@@ -5,11 +5,23 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 
+import src.main.java.com.studql.rtree.callables.TreeDeleteCallable;
+import src.main.java.com.studql.rtree.callables.TreeInsertCallable;
+import src.main.java.com.studql.rtree.callables.TreeKNNSearchCallable;
+import src.main.java.com.studql.rtree.callables.TreeRangeSearchCallable;
+import src.main.java.com.studql.rtree.callables.TreeSearchCallable;
+import src.main.java.com.studql.rtree.node.QuadraticSplitter;
 import src.main.java.com.studql.shape.Point;
 import src.main.java.com.studql.shape.Rectangle;
 import src.main.java.com.studql.utils.Benchmark;
+import src.main.java.com.studql.utils.Pair;
+import src.main.java.com.studql.utils.Record;
 import src.main.java.com.studql.utils.Visualizer;
 
 public class Main {
@@ -37,7 +49,6 @@ public class Main {
 			tree.insert(r);
 		}
 		System.out.println(tree.toString());
-
 		Visualizer<Rectangle> v = new Visualizer<Rectangle>();
 		try {
 			v.createVisualization(tree, new File("C:\\Users\\alzajac\\Downloads\\test.png"));
@@ -45,11 +56,6 @@ public class Main {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-//		for (Record<Rectangle> r : dataPoints) {
-//			tree.delete(r);
-//			System.out.println(tree.toString());
-//		}
 	}
 
 	public static void test_points() {
@@ -86,26 +92,420 @@ public class Main {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-//		for (Record<Point> r : dataPoints) {
-//			tree.delete(r);
-//			System.out.println(tree.toString());
-//		}
 	}
 
-	public static void main(String[] args) {
-//		test_rectangles();
+	public static void test_multithread_knnSearch(int num_datapoints, int num_search_points, int divideFactor,
+			int[] xRange, int[] yRange, int k) throws InterruptedException {
 		Benchmark b = new Benchmark();
-//		int n = 10000;
-//		int[] xRange = new int[] { 0, 400 };
-//		int[] yRange = new int[] { 0, 600 };
+
+		// create data points
+		Rectangle[] rectangles = b.generateRandomRectangles(num_datapoints, xRange, yRange);
+		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
+
+		// create search data points
+		Rectangle[] searchRectangles = b.generateRandomRectangles(num_search_points, xRange, yRange);
+		List<Record<Rectangle>> searchRecords = b.generateRecordsRectangle(searchRectangles);
+
+		// init tree and Executor
+		RtreeMulti<Rectangle> tree = new RtreeMulti<Rectangle>();
+		tree.insert(records);
+		ExecutorService pool = Executors.newCachedThreadPool();
+		List<Future<List<List<Pair<Record<Rectangle>, Float>>>>> results = null;
+		List<TreeKNNSearchCallable<Rectangle>> tasks = new ArrayList<TreeKNNSearchCallable<Rectangle>>();
+
+		// submit tasks
+		for (int i = 0; i < num_search_points / divideFactor; i++) {
+			int startIndex = i * divideFactor, endIndex = (i + 1) * divideFactor;
+			List<Record<Rectangle>> slicedRecords = new ArrayList<Record<Rectangle>>(
+					searchRecords.subList(startIndex, endIndex));
+			tasks.add(new TreeKNNSearchCallable<Rectangle>(tree, i, slicedRecords, k));
+		}
+		long start = System.currentTimeMillis();
+		long end = 0;
+		try {
+			results = pool.invokeAll(tasks);
+			end = System.currentTimeMillis();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		pool.shutdown();
+
+		// get results
+		for (Future<List<List<Pair<Record<Rectangle>, Float>>>> result : results) {
+			List<List<Pair<Record<Rectangle>, Float>>> v = null;
+			try {
+				v = result.get();
+//				System.out.println("Search operations: " + v);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
+		}
+
+		// print results
+//		System.out.println(tree.toString());
+		System.out.printf("time multi-thread: %d ms\n\n", end - start);
+	}
+
+	public static void test_multithread_rangeSearch(int num_datapoints, int num_search_points, int divideFactor,
+			int[] xRange, int[] yRange) throws InterruptedException {
+		Benchmark b = new Benchmark();
+
+		// create data points
+		Rectangle[] rectangles = b.generateRandomRectangles(num_datapoints, xRange, yRange);
+		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
+
+		// create search data points
+		List<Rectangle> searchRectangles = Arrays.asList(b.generateRandomRectangles(num_search_points, xRange, yRange));
+		;
+
+		// init tree and Executor
+		RtreeMulti<Rectangle> tree = new RtreeMulti<Rectangle>();
+		tree.insert(records);
+		ExecutorService pool = Executors.newCachedThreadPool();
+		List<Future<List<List<Record<Rectangle>>>>> results = null;
+		List<TreeRangeSearchCallable<Rectangle>> tasks = new ArrayList<TreeRangeSearchCallable<Rectangle>>();
+
+		// submit tasks
+		for (int i = 0; i < num_search_points / divideFactor; i++) {
+			int startIndex = i * divideFactor, endIndex = (i + 1) * divideFactor;
+			List<Rectangle> slicedRecords = new ArrayList<Rectangle>(searchRectangles.subList(startIndex, endIndex));
+			tasks.add(new TreeRangeSearchCallable<Rectangle>(tree, i, slicedRecords));
+		}
+		long start = System.currentTimeMillis();
+		long end = 0;
+		try {
+			results = pool.invokeAll(tasks);
+			end = System.currentTimeMillis();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		pool.shutdown();
+
+		// get results
+		for (Future<List<List<Record<Rectangle>>>> result : results) {
+			List<List<Record<Rectangle>>> v = null;
+			try {
+				v = result.get();
+//				System.out.println("Search operations: " + v);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
+		}
+
+		// print results
+//		System.out.println(tree.toString());
+		System.out.printf("time multi-thread: %d ms\n\n", end - start);
+	}
+
+	public static void test_multithread_search(int num_datapoints, int num_search_points, int divideFactor,
+			int[] xRange, int[] yRange) throws InterruptedException {
+		Benchmark b = new Benchmark();
+
+		// create data points
+		Rectangle[] rectangles = b.generateRandomRectangles(num_datapoints, xRange, yRange);
+		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
+
+		// create search data points
+		Rectangle[] searchRectangles = b.generateRandomRectangles(num_search_points, xRange, yRange);
+		List<Record<Rectangle>> searchRecords = b.generateRecordsRectangle(searchRectangles);
+
+		// init tree and Executor
+		RtreeMulti<Rectangle> tree = new RtreeMulti<Rectangle>();
+		tree.insert(records);
+		ExecutorService pool = Executors.newCachedThreadPool();
+		List<Future<List<Record<Rectangle>>>> results = null;
+		List<TreeSearchCallable<Rectangle>> tasks = new ArrayList<TreeSearchCallable<Rectangle>>();
+
+		// submit tasks
+		for (int i = 0; i < num_search_points / divideFactor; i++) {
+			int startIndex = i * divideFactor, endIndex = (i + 1) * divideFactor;
+			List<Record<Rectangle>> slicedRecords = new ArrayList<Record<Rectangle>>(
+					searchRecords.subList(startIndex, endIndex));
+			tasks.add(new TreeSearchCallable<Rectangle>(tree, i, slicedRecords));
+		}
+		long start = System.currentTimeMillis();
+		long end = 0;
+		try {
+			results = pool.invokeAll(tasks);
+			end = System.currentTimeMillis();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		pool.shutdown();
+
+		// get results
+		for (Future<List<Record<Rectangle>>> result : results) {
+			List<Record<Rectangle>> v = null;
+			try {
+				v = result.get();
+//				System.out.println("Search operations: " + v);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
+		}
+
+		// print results
+//		System.out.println(tree.toString());
+		System.out.printf("time multi-thread: %d ms\n\n", end - start);
+	}
+
+	public static void test_multithread_delete(int num_datapoints, int divideFactor, int[] xRange, int[] yRange)
+			throws InterruptedException {
+		Benchmark b = new Benchmark();
+
+		// create data points
+		Rectangle[] rectangles = b.generateRandomRectangles(num_datapoints, xRange, yRange);
+		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
+
+		// init tree and Executor
+		RtreeMulti<Rectangle> tree = new RtreeMulti<Rectangle>();
+		tree.insert(records);
+		ExecutorService pool = Executors.newCachedThreadPool();
+		List<Future<List<Boolean>>> results = null;
+		List<TreeDeleteCallable<Rectangle>> tasks = new ArrayList<TreeDeleteCallable<Rectangle>>();
+
+		// submit tasks
+		for (int i = 0; i < num_datapoints / divideFactor; i++) {
+			int startIndex = i * divideFactor, endIndex = (i + 1) * divideFactor;
+			List<Record<Rectangle>> slicedRecords = new ArrayList<Record<Rectangle>>(
+					records.subList(startIndex, endIndex));
+			tasks.add(new TreeDeleteCallable<Rectangle>(tree, i, slicedRecords));
+		}
+		long start = System.currentTimeMillis();
+		long end = 0;
+		try {
+			results = pool.invokeAll(tasks);
+			end = System.currentTimeMillis();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		pool.shutdown();
+
+		// get results
+		for (Future<List<Boolean>> result : results) {
+			List<Boolean> v = null;
+			try {
+				v = result.get();
+//				System.out.println("Delete operations: " + v);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
+		}
+
+		// print results
+//		System.out.println(tree.toString());
+		System.out.printf("time multi-thread: %d ms\n\n", end - start);
+	}
+
+	public static void test_multithread_insert(int num_datapoints, int divideFactor, int[] xRange, int[] yRange)
+			throws InterruptedException {
+		Benchmark b = new Benchmark();
+
+		// create data points
+		Rectangle[] rectangles = b.generateRandomRectangles(num_datapoints, xRange, yRange);
+		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
+
+		// init tree and Executor
+		RtreeMulti<Rectangle> tree = new RtreeMulti<Rectangle>();
+		ExecutorService pool = Executors.newCachedThreadPool();
+		List<TreeInsertCallable<Rectangle>> tasks = new ArrayList<TreeInsertCallable<Rectangle>>();
+
+		// submit tasks
+		for (int i = 0; i < num_datapoints / divideFactor; i++) {
+			int startIndex = i * divideFactor, endIndex = (i + 1) * divideFactor;
+			List<Record<Rectangle>> slicedRecords = new ArrayList<Record<Rectangle>>(
+					records.subList(startIndex, endIndex));
+			tasks.add(new TreeInsertCallable<Rectangle>(tree, i, slicedRecords));
+		}
+		long start = System.currentTimeMillis();
+		long end = 0;
+		try {
+			pool.invokeAll(tasks);
+			end = System.currentTimeMillis();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		pool.shutdown();
+
+		// print results and cleanup
+//		System.out.println(tree.toString());
+		System.out.printf("time multi-thread: %d ms\n\n", end - start);
+	}
+
+	public static void test_single_insert(int num_datapoints, int[] xRange, int[] yRange) {
+		Benchmark b = new Benchmark();
+
+		// create data points
+		Rectangle[] rectangles = b.generateRandomRectangles(num_datapoints, xRange, yRange);
+		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
+
+		// init tree and Executor
+		Rtree<Rectangle> tree = new Rtree<Rectangle>();
+
+		// test single thread
+		long start = System.currentTimeMillis();
+		tree.insert(records);
+		long end = System.currentTimeMillis();
+//		System.out.println(tree.toString());
+		System.out.printf("time single-thread: %d ms\n\n", end - start);
+
+		Visualizer<Rectangle> v = new Visualizer<Rectangle>();
+		try {
+			v.createVisualization(tree, new File("C:\\Users\\alzajac\\Downloads\\test.png"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public static void test_single_delete(int num_datapoints, int[] xRange, int[] yRange) {
+		Benchmark b = new Benchmark();
+
+		// create data points
+		Rectangle[] rectangles = b.generateRandomRectangles(num_datapoints, xRange, yRange);
+		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
+
+		// init tree and Executor
+		Rtree<Rectangle> tree = new Rtree<Rectangle>();
+
+		// test single thread
+		tree.insert(records);
+		long start = System.currentTimeMillis();
+		tree.delete(records);
+		long end = System.currentTimeMillis();
+		System.out.println(tree.toString());
+		System.out.printf("time single-thread: %d ms\n\n", end - start);
+	}
+
+	public static void test_single_search(int num_datapoints, int num_search_points, int divideFactor, int[] xRange,
+			int[] yRange) {
+		Benchmark b = new Benchmark();
+
+		// create data points
+		Rectangle[] rectangles = b.generateRandomRectangles(num_datapoints, xRange, yRange);
+		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
+
+		// create search data points
+		Rectangle[] searchRectangles = b.generateRandomRectangles(num_search_points, xRange, yRange);
+		List<Record<Rectangle>> searchRecords = b.generateRecordsRectangle(searchRectangles);
+
+		// init tree and Executor
+		Rtree<Rectangle> tree = new Rtree<Rectangle>();
+
+		// test single thread
+		tree.insert(records);
+		List<List<Record<Rectangle>>> searchResults = new ArrayList<List<Record<Rectangle>>>();
+		long start = System.currentTimeMillis();
+		for (int i = 0; i < num_search_points / divideFactor; i++) {
+			int startIndex = i * divideFactor, endIndex = (i + 1) * divideFactor;
+			List<Record<Rectangle>> slicedRecords = new ArrayList<Record<Rectangle>>(
+					searchRecords.subList(startIndex, endIndex));
+			searchResults.add(tree.search(slicedRecords));
+		}
+		long end = System.currentTimeMillis();
+//		System.out.println(tree.toString());
+//		System.out.println(searchResults);
+		System.out.printf("time single-thread: %d ms\n\n", end - start);
+	}
+
+	public static void test_single_rangeSearch(int num_datapoints, int num_search_points, int divideFactor,
+			int[] xRange, int[] yRange) {
+		Benchmark b = new Benchmark();
+
+		// create data points
+		Rectangle[] rectangles = b.generateRandomRectangles(num_datapoints, xRange, yRange);
+		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
+
+		// create search data points
+		List<Rectangle> searchRectangles = Arrays.asList(b.generateRandomRectangles(num_search_points, xRange, yRange));
+
+		// init tree and Executor
+		Rtree<Rectangle> tree = new Rtree<Rectangle>();
+
+		// test single thread
+		tree.insert(records);
+		List<List<List<Record<Rectangle>>>> searchResults = new ArrayList<List<List<Record<Rectangle>>>>();
+		long start = System.currentTimeMillis();
+		for (int i = 0; i < num_search_points / divideFactor; i++) {
+			int startIndex = i * divideFactor, endIndex = (i + 1) * divideFactor;
+			List<Rectangle> slicedRecords = new ArrayList<Rectangle>(searchRectangles.subList(startIndex, endIndex));
+			searchResults.add(tree.rangeSearch(slicedRecords));
+		}
+		long end = System.currentTimeMillis();
+//		System.out.println(tree.toString());
+//		System.out.println(searchResults);
+		System.out.printf("time single-thread: %d ms\n\n", end - start);
+	}
+
+	public static void test_single_knnSearch(int num_datapoints, int num_search_points, int divideFactor, int[] xRange,
+			int[] yRange, int k) {
+		Benchmark b = new Benchmark();
+
+		// create data points
+		Rectangle[] rectangles = b.generateRandomRectangles(num_datapoints, xRange, yRange);
+		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
+
+		// create search data points
+		Rectangle[] searchRectangles = b.generateRandomRectangles(num_search_points, xRange, yRange);
+		List<Record<Rectangle>> searchRecords = b.generateRecordsRectangle(searchRectangles);
+
+		// init tree and Executor
+		Rtree<Rectangle> tree = new Rtree<Rectangle>();
+
+		// test single thread
+		tree.insert(records);
+		List<List<List<Pair<Record<Rectangle>, Float>>>> searchResults = new ArrayList<List<List<Pair<Record<Rectangle>, Float>>>>();
+		long start = System.currentTimeMillis();
+		for (int i = 0; i < num_search_points / divideFactor; i++) {
+			int startIndex = i * divideFactor, endIndex = (i + 1) * divideFactor;
+			List<Record<Rectangle>> slicedRecords = new ArrayList<Record<Rectangle>>(
+					searchRecords.subList(startIndex, endIndex));
+			searchResults.add(tree.nearestNeighborsSearch(slicedRecords, k));
+		}
+		long end = System.currentTimeMillis();
+//		System.out.println(tree.toString());
+//		System.out.println(searchResults);
+		System.out.printf("time single-thread: %d ms\n\n", end - start);
+	}
+
+	public static void completeSingleBenchmark() {
+		Benchmark b = new Benchmark();
+		int n = 10000;
+		int[] xRange = new int[] { 0, 400 };
+		int[] yRange = new int[] { 0, 600 };
 		int[] page_sizes = new int[] { 6, 12, 25, 50, 102 };
 		List<Function<Integer, Integer>> min_page_operators = Arrays.asList(num -> Math.round(num) / 3,
 				num -> Math.round(num) / 2, num -> 2);
 		boolean shouldVisualize = true;
 		String fileLocation = "C:\\Users\\alzajac\\Downloads\\1000.txt";
-//		b.benchmarkInsertWithRandomRectangles(n, xRange, yRange, page_sizes, min_page_operators, shouldVisualize);
+		b.benchmarkInsertWithRandomRectangles(n, xRange, yRange, page_sizes, min_page_operators, shouldVisualize);
 		b.benchmarkInsertWithDatasetPoints(fileLocation, page_sizes, min_page_operators, shouldVisualize);
+	}
+
+	public static void main(String[] args) {
+
+		int n = 100;
+		int n_search = 100000;
+		int divideFactor = 10000;
+		int k = 3;
+		int[] xRange = new int[] { 0, 500 };
+		int[] yRange = new int[] { -100, 600 };
+		test_single_insert(n, xRange, yRange);
+		try {
+			test_multithread_insert(n, divideFactor, xRange, yRange);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 }
