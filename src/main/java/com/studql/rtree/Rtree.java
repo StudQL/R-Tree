@@ -3,6 +3,7 @@ package src.main.java.com.studql.rtree;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.Stack;
 
 import src.main.java.com.studql.rtree.node.Node;
@@ -313,7 +314,7 @@ public class Rtree<T extends Boundable> {
 		ArrayList<Pair<Record<T>, Float>> result = new ArrayList<Pair<Record<T>, Float>>();
 		Rectangle recordMbr = record.getMbr();
 		// init stack for dfs in valid childs
-		PriorityQueue<Node<T>> closestNodes = new PriorityQueue<Node<T>>(new NodeDistanceComparator<T>(recordMbr));
+		Queue<Node<T>> closestNodes = new PriorityQueue<Node<T>>(new NodeDistanceComparator<T>(recordMbr));
 		// traverse whole tree
 		closestNodes.add(this.root);
 		while (!closestNodes.isEmpty() && k > 0) {
