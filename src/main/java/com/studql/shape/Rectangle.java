@@ -49,6 +49,14 @@ public final class Rectangle implements Boundable {
 	public Rectangle getMbr() {
 		return this;
 	}
+	
+	public float lowest() {
+		return topRight.SumCoord();
+	}
+	
+	public float highest() {
+		return bottomLeft.SumCoord();
+	}
 
 	@Override
 	public boolean equals(Object obj) {

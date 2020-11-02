@@ -27,6 +27,10 @@ public final class Point implements Boundable {
 	public Rectangle getMbr() {
 		return this.mbr;
 	}
+	
+	public float SumCoord() {
+		return x + y;
+	}
 
 	@Override
 	public boolean equals(Object obj) {

@@ -40,7 +40,7 @@ public class Main {
 
 		Visualizer<Rectangle> v = new Visualizer<Rectangle>();
 		try {
-			v.createVisualization(tree, new File("C:\\Users\\alzajac\\Downloads\\test.png"));
+			v.createVisualization(tree, new File("D:\\Users\\utilisateur\\Downloads\\test.png"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -55,7 +55,7 @@ public class Main {
 	public static void test_points() {
 		int min_records = 2;
 		int max_records = 4;
-		Rtree<Point> tree = new Rtree<Point>(min_records, max_records, new QuadraticSplitter<Point>(min_records));
+		Rtree<Point> tree = new Rtree<Point>(min_records, max_records, new LinearSplitter<Point>(min_records));
 
 		@SuppressWarnings("serial")
 		ArrayList<Record<Point>> dataPoints = new ArrayList<Record<Point>>() {
@@ -81,7 +81,7 @@ public class Main {
 
 		Visualizer<Point> v = new Visualizer<Point>();
 		try {
-			v.createVisualization(tree, new File("C:\\Users\\alzajac\\Downloads\\test.png"));
+			v.createVisualization(tree, new File("D:\\Users\\utilisateur\\Downloads\\test.png"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -94,18 +94,21 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
+		String fileLocation = "D:\\Users\\utilisateur\\Downloads\\";
+		test_points();
+		
 //		test_rectangles();
-		Benchmark b = new Benchmark();
-//		int n = 10000;
-//		int[] xRange = new int[] { 0, 400 };
-//		int[] yRange = new int[] { 0, 600 };
+		Benchmark b = new Benchmark(fileLocation);
+		int n = 1000;
+		int[] xRange = new int[] { 0, 400 };
+		int[] yRange = new int[] { 0, 600 };
 		int[] page_sizes = new int[] { 6, 12, 25, 50, 102 };
 		List<Function<Integer, Integer>> min_page_operators = Arrays.asList(num -> Math.round(num) / 3,
 				num -> Math.round(num) / 2, num -> 2);
 		boolean shouldVisualize = true;
-		String fileLocation = "C:\\Users\\alzajac\\Downloads\\1000.txt";
-//		b.benchmarkInsertWithRandomRectangles(n, xRange, yRange, page_sizes, min_page_operators, shouldVisualize);
-		b.benchmarkInsertWithDatasetPoints(fileLocation, page_sizes, min_page_operators, shouldVisualize);
+
+		b.benchmarkInsertWithRandomPoints(n, xRange, yRange, page_sizes, min_page_operators, shouldVisualize);
+		//b.benchmarkInsertWithDatasetPoints(fileLocation, page_sizes, min_page_operators, shouldVisualize);
 	}
 
 }

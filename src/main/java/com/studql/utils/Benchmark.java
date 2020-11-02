@@ -10,15 +10,16 @@ import java.util.function.Function;
 
 import src.main.java.com.studql.rtree.NodeSplitter;
 import src.main.java.com.studql.rtree.QuadraticSplitter;
+import src.main.java.com.studql.rtree.LinearSplitter;
 import src.main.java.com.studql.rtree.Record;
 import src.main.java.com.studql.rtree.Rtree;
 import src.main.java.com.studql.shape.Point;
 import src.main.java.com.studql.shape.Rectangle;
 
-public class Benchmark {
-
-	public Benchmark() {
-
+public class Benchmark{
+	private String fileLocation;
+	public Benchmark(String fileLocation) {
+		this.fileLocation = fileLocation;
 	}
 
 	private int getRandomInRange(int min, int max) {
@@ -80,7 +81,7 @@ public class Benchmark {
 		for (int max_page_size : page_sizes) {
 			for (var operation : min_size_operations) {
 				int min_page_size = operation.apply(max_page_size);
-				NodeSplitter<Rectangle> splitter = new QuadraticSplitter<Rectangle>(min_page_size);
+				NodeSplitter<Rectangle> splitter = new LinearSplitter<Rectangle>(min_page_size);
 				Rtree<Rectangle> tree = new Rtree<Rectangle>(min_page_size, max_page_size, splitter);
 				for (Record<Rectangle> record : records) {
 					tree.insert(record);
@@ -88,8 +89,8 @@ public class Benchmark {
 				if (shouldVisualize) {
 					Visualizer<Rectangle> v = new Visualizer<Rectangle>();
 					try {
-						String splitter_type = splitter instanceof QuadraticSplitter<?> ? "Quadratic" : "Linear";
-						v.createVisualization(tree, new File("C:\\Users\\alzajac\\Downloads\\" + "m=" + min_page_size
+						String splitter_type = splitter instanceof LinearSplitter<?> ? "Quadratic" : "Linear";
+						v.createVisualization(tree, new File(this.fileLocation + "m=" + min_page_size
 								+ "M=" + max_page_size + "splitter=" + splitter_type + ".png"));
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
@@ -107,7 +108,7 @@ public class Benchmark {
 		for (int max_page_size : page_sizes) {
 			for (var operation : min_size_operations) {
 				int min_page_size = operation.apply(max_page_size);
-				NodeSplitter<Point> splitter = new QuadraticSplitter<Point>(min_page_size);
+				NodeSplitter<Point> splitter = new LinearSplitter<Point>(min_page_size);
 				Rtree<Point> tree = new Rtree<Point>(min_page_size, max_page_size, splitter);
 				for (Record<Point> record : records) {
 					tree.insert(record);
@@ -115,8 +116,8 @@ public class Benchmark {
 				if (shouldVisualize) {
 					Visualizer<Point> v = new Visualizer<Point>();
 					try {
-						String splitter_type = splitter instanceof QuadraticSplitter<?> ? "Quadratic" : "Linear";
-						v.createVisualization(tree, new File("C:\\Users\\alzajac\\Downloads\\" + "m=" + min_page_size
+						String splitter_type = splitter instanceof LinearSplitter<?> ? "Quadratic" : "Linear";
+						v.createVisualization(tree, new File(this.fileLocation + "m=" + min_page_size
 								+ "M=" + max_page_size + "splitter=" + splitter_type + ".png"));
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
