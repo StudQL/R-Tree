@@ -5,7 +5,9 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import javax.imageio.ImageIO;
 
@@ -18,7 +20,7 @@ import src.main.java.com.studql.shape.Rectangle;
 public class Visualizer<T extends Boundable> {
 	private final int image_size;
 	private static final int PADDING = 40;
-	private static final int OVERLAP_TRANSPARENCY = 7;
+	private static final int OVERLAP_TRANSPARENCY = 20;
 	// bright pink
 	private static final Color RECORD_COLOR = new Color(254, 2, 164);
 
@@ -94,7 +96,7 @@ public class Visualizer<T extends Boundable> {
 	private void drawInternalNode(Graphics2D g, Node<T> node, float[] rootMbrWidthRange, float[] rootMbrHeightRange,
 			int nodeHeight, int treeHeight) {
 		// level of green
-		float interpolatedWithHeight = this.interpolatePoint(nodeHeight, new float[] { 0, treeHeight },
+		float interpolatedWithHeight = this.interpolatePoint(nodeHeight, new float[] { treeHeight, 0 },
 				new float[] { 0, 255 });
 		int interpolatedGreenValue = Math.round(interpolatedWithHeight);
 		// create colors proportional to depth of node
@@ -110,20 +112,35 @@ public class Visualizer<T extends Boundable> {
 		g.fill(mbr.draw(drawingDimensions[0], drawingDimensions[1], drawingDimensions[2], drawingDimensions[3]));
 	}
 
-	public void drawNode(Node<T> node, Graphics2D g, float[] rootMbrWidthRange, float[] rootMbrHeightRange,
-			int nodeHeight, int treeHeight) {
-		if (node != null) {
-			if (node.getRecord() != null)
-				this.drawRecordNode(g, node, rootMbrWidthRange, rootMbrHeightRange);
-			else
-				this.drawInternalNode(g, node, rootMbrWidthRange, rootMbrHeightRange, nodeHeight, treeHeight);
-			List<Node<T>> children = node.getChildren();
-			// we prefer to draw the leaf nodes last, in a top down approach
-			if (children != null) {
-				for (Node<T> child : children)
-					this.drawNode(child, g, rootMbrWidthRange, rootMbrHeightRange, nodeHeight - 1, treeHeight);
+	public void drawNodes(Node<T> root, Graphics2D g, float[] rootMbrWidthRange, float[] rootMbrHeightRange,
+			int treeHeight) {
+		// performing level order traversal to have the records drawn last all at once
+		Queue<Node<T>> queue = new LinkedList<Node<T>>();
+		queue.add(root);
+		queue.add(null);
+		int nodeHeight = 0;
+		while (!queue.isEmpty()) {
+			Node<T> current = queue.poll();
+			// draw current node
+			if (current != null) {
+				if (current.getRecord() != null)
+					this.drawRecordNode(g, current, rootMbrWidthRange, rootMbrHeightRange);
+				else
+					this.drawInternalNode(g, current, rootMbrWidthRange, rootMbrHeightRange, nodeHeight, treeHeight);
+				// add next level
+				List<Node<T>> children = current.getChildren();
+				if (children != null) {
+					for (Node<T> child : children)
+						queue.add(child);
+				}
+			}
+			// reached next level
+			else if (!queue.isEmpty()) {
+				++nodeHeight;
+				queue.add(null);
 			}
 		}
+
 	}
 
 	public void createVisualization(Rtree<T> tree, File filelocation) throws IOException {
@@ -137,7 +154,7 @@ public class Visualizer<T extends Boundable> {
 		float[] rootMbrWidthRange = new float[] { rootMbr.getTopLeft().getX(), rootMbr.getTopRight().getX() };
 		float[] rootMbrHeightRange = new float[] { rootMbr.getBottomLeft().getY(), rootMbr.getTopLeft().getY() };
 		// draw tree recursively
-		this.drawNode(tree.getRoot(), graphics2D, rootMbrWidthRange, rootMbrHeightRange, treeHeight, treeHeight);
+		this.drawNodes(tree.getRoot(), graphics2D, rootMbrWidthRange, rootMbrHeightRange, treeHeight);
 		graphics2D.dispose();
 
 		ImageIO.write(image, "png", filelocation);
