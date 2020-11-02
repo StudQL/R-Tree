@@ -55,6 +55,15 @@ public class Benchmark {
 		return records;
 	}
 
+	public List<Record<Point>> generateRecordsPoints(Point[] points) {
+		List<Record<Point>> records = new ArrayList<Record<Point>>();
+		int id = 0;
+		for (Point p : points) {
+			records.add(new Record<Point>(p, Integer.toString(id++)));
+		}
+		return records;
+	}
+
 	public void benchmarkInsertWithRandomPoints(int num_datapoints, int[] xRange, int[] yRange, int[] page_sizes,
 			List<Function<Integer, Integer>> min_size_operations, boolean shouldVisualize) {
 		// generate random records
