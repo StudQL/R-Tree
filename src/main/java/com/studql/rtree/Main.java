@@ -80,7 +80,11 @@ public class Main {
 				add(new Record<Point>(new Point(4, 3), "12"));
 			}
 		};
-		for (Record<Point> r : dataPoints) {
+		// create data points
+		Benchmark b = new Benchmark();
+		Point[] points = b.generateRandomPoints(1000, new int[] { 0, 1000 }, new int[] { 100, 1000 });
+		List<Record<Point>> records = b.generateRecordsPoints(points);
+		for (Record<Point> r : records) {
 			tree.insert(r);
 		}
 		System.out.println(tree.toString());
@@ -356,14 +360,6 @@ public class Main {
 		long end = System.currentTimeMillis();
 //		System.out.println(tree.toString());
 		System.out.printf("time single-thread: %d ms\n\n", end - start);
-
-		Visualizer<Rectangle> v = new Visualizer<Rectangle>();
-		try {
-			v.createVisualization(tree, new File("C:\\Users\\alzajac\\Downloads\\test.png"));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	public static void test_single_delete(int num_datapoints, int[] xRange, int[] yRange) {
@@ -491,7 +487,7 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
-
+		test_points();
 		int n = 100;
 		int n_search = 100000;
 		int divideFactor = 10000;
