@@ -1,4 +1,4 @@
-package src.main.java.com.studql.rtree;
+package src.main.java.com.studql.utils;
 
 import src.main.java.com.studql.shape.Boundable;
 import src.main.java.com.studql.shape.Rectangle;

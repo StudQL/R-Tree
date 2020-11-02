@@ -8,11 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import src.main.java.com.studql.rtree.NodeSplitter;
-import src.main.java.com.studql.rtree.QuadraticSplitter;
-import src.main.java.com.studql.rtree.LinearSplitter;
-import src.main.java.com.studql.rtree.Record;
 import src.main.java.com.studql.rtree.Rtree;
+import src.main.java.com.studql.rtree.node.LinearSplitter;
+import src.main.java.com.studql.rtree.node.NodeSplitter;
+import src.main.java.com.studql.rtree.node.QuadraticSplitter;
 import src.main.java.com.studql.shape.Point;
 import src.main.java.com.studql.shape.Rectangle;
 
@@ -26,7 +25,7 @@ public class Benchmark{
 		return (int) ((Math.random() * (max - min)) + min);
 	}
 
-	private Point[] generateRandomPoints(int n, int[] xRange, int[] yRange) {
+	public Point[] generateRandomPoints(int n, int[] xRange, int[] yRange) {
 		Point[] dataPoints = new Point[n];
 		for (int i = 0; i < n; ++i) {
 			int x = this.getRandomInRange(xRange[0], xRange[1]);
@@ -36,7 +35,7 @@ public class Benchmark{
 		return dataPoints;
 	}
 
-	private Rectangle[] generateRandomRectangles(int n, int[] xRange, int[] yRange) {
+	public Rectangle[] generateRandomRectangles(int n, int[] xRange, int[] yRange) {
 		Rectangle[] dataPoints = new Rectangle[n];
 		for (int i = 0; i < n; ++i) {
 			int xBottomRight = this.getRandomInRange(xRange[0], xRange[1]);
@@ -46,6 +45,24 @@ public class Benchmark{
 			dataPoints[i] = new Rectangle(new Point(xTopLeft, yTopLeft), new Point(xBottomRight, yBottomRight));
 		}
 		return dataPoints;
+	}
+
+	public List<Record<Rectangle>> generateRecordsRectangle(Rectangle[] rectangles) {
+		List<Record<Rectangle>> records = new ArrayList<Record<Rectangle>>();
+		int id = 0;
+		for (Rectangle r : rectangles) {
+			records.add(new Record<Rectangle>(r, Integer.toString(id++)));
+		}
+		return records;
+	}
+
+	public List<Record<Point>> generateRecordsPoints(Point[] points) {
+		List<Record<Point>> records = new ArrayList<Record<Point>>();
+		int id = 0;
+		for (Point p : points) {
+			records.add(new Record<Point>(p, Integer.toString(id++)));
+		}
+		return records;
 	}
 
 	public void benchmarkInsertWithRandomPoints(int num_datapoints, int[] xRange, int[] yRange, int[] page_sizes,

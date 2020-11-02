@@ -2,6 +2,10 @@ package src.main.java.com.studql.shape;
 
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.List;
+
+import src.main.java.com.studql.utils.Pair;
 
 public final class Rectangle implements Boundable {
 	private final Point topLeft;
@@ -93,21 +97,56 @@ public final class Rectangle implements Boundable {
 		return minInstanceDimensions[0] <= minRectDimensions[0] && minInstanceDimensions[1] >= minRectDimensions[1]
 				&& minInstanceDimensions[2] <= minRectDimensions[2] && minInstanceDimensions[3] >= minRectDimensions[3];
 	}
-	
-	public boolean isOverLapping(Rectangle r) { 
-		if (this.topLeft.getX() > r.bottomRight.getX() // this is right to r 
-		|| this.bottomRight.getX() < r.topLeft.getX() // this is left to r 
-		|| this.topLeft.getY() < r.bottomRight.getY() // this is above r 
-		|| this.bottomRight.getY() > r.topLeft.getY()) { // this is below r 
-		return false; 
-		} 
-		return true; 
-    }
+
+	public boolean isOverLapping(Rectangle r) {
+		if (this.topLeft.getX() > r.bottomRight.getX() // this is right to r
+				|| this.bottomRight.getX() < r.topLeft.getX() // this is left to r
+				|| this.topLeft.getY() < r.bottomRight.getY() // this is above r
+				|| this.bottomRight.getY() > r.topLeft.getY()) { // this is below r
+			return false;
+		}
+		return true;
+	}
 
 	public float area() {
 		float length = this.topRight.getX() - this.topLeft.getX();
 		float height = this.topLeft.getY() - this.bottomLeft.getY();
 		return length * height;
+	}
+
+	private Point getCenter() {
+		float centerX = ((this.getBottomRight().getX() - this.getBottomLeft().getX()) / 2)
+				+ this.getBottomLeft().getX();
+		float centerY = ((this.getTopRight().getY() - this.getBottomRight().getY()) / 2) + this.getBottomLeft().getY();
+		return new Point(centerX, centerY);
+	}
+
+	private Pair<Point, Point> getClosestCorners(Rectangle r) {
+		float distTopBottom = Math.abs(this.getTopLeft().getY() - r.getBottomLeft().getY());
+		float distBottomTop = Math.abs(this.getBottomLeft().getY() - r.getTopLeft().getY());
+		List<Point> cornersInstance = new ArrayList<Point>();
+		List<Point> cornersR = new ArrayList<Point>();
+		if (distBottomTop < distTopBottom) {
+			cornersInstance.add(this.getBottomLeft());
+			cornersInstance.add(this.getBottomRight());
+			cornersR.add(r.getTopLeft());
+			cornersR.add(r.getTopRight());
+		} else {
+			cornersInstance.add(this.getTopLeft());
+			cornersInstance.add(this.getTopRight());
+			cornersR.add(r.getBottomLeft());
+			cornersR.add(r.getBottomRight());
+		}
+		return Point.getClosestPair(cornersInstance, cornersR);
+	}
+
+	// closest corner distance
+	public float distance(Rectangle r) {
+		if (this.isOverLapping(r))
+			return 0;
+		Pair<Point, Point> closestCorners = this.getClosestCorners(r);
+		Point p1 = closestCorners.getFirst(), p2 = closestCorners.getSecond();
+		return p1.euclidianDistance(p2);
 	}
 
 	public float intersectArea(Rectangle r) {

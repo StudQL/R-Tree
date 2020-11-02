@@ -1,4 +1,4 @@
-package src.main.java.com.studql.rtree;
+package src.main.java.com.studql.utils;
 
 public class Pair<T, U> {
 	private T val1;
@@ -15,5 +15,9 @@ public class Pair<T, U> {
 
 	public U getSecond() {
 		return this.val2;
+	}
+
+	public String toString() {
+		return "<" + val1.toString() + ", " + val2.toString() + ">";
 	}
 }

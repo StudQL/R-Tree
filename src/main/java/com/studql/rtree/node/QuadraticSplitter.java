@@ -1,9 +1,10 @@
-package src.main.java.com.studql.rtree;
+package src.main.java.com.studql.rtree.node;
 
 import java.util.ArrayList;
 
 import src.main.java.com.studql.shape.Boundable;
 import src.main.java.com.studql.shape.Rectangle;
+import src.main.java.com.studql.utils.Pair;
 
 public class QuadraticSplitter<T extends Boundable> extends NodeSplitter<T> {
 
@@ -19,8 +20,10 @@ public class QuadraticSplitter<T extends Boundable> extends NodeSplitter<T> {
 		// iterate over all possible pairs
 		for (int i = 0; i < records.size(); i++) {
 			Node<T> E1 = records.get(i);
+
 			for (int j = i + 1; j < records.size(); j++) {
 				Node<T> E2 = records.get(j);
+
 				// build rectangle that englobes E1 and E2
 				Rectangle enclosingRectangle = Rectangle.buildRectangle(E1.getMbr(), E2.getMbr());
 				Rectangle E1Mbr = E1.getMbr(), E2Mbr = E2.getMbr();
@@ -30,7 +33,9 @@ public class QuadraticSplitter<T extends Boundable> extends NodeSplitter<T> {
 					maxWaste = d;
 					mostWastefulePair = new Pair<Node<T>, Node<T>>(E1, E2);
 				}
+
 			}
+
 		}
 		return mostWastefulePair;
 	}
@@ -48,11 +53,13 @@ public class QuadraticSplitter<T extends Boundable> extends NodeSplitter<T> {
 				chosenEntry = entry;
 				maxDifference = maxEnlargementDifference;
 			}
+
 		}
 		// selecting group to which we add the selected entry
 		this.resolveTies(L1, L2, chosenEntry);
 		// remove chosenRecord from records
 		records.remove(chosenEntry);
+
 	}
 
 	private void resolveTies(Node<T> L1, Node<T> L2, Node<T> chosenEntry) {
@@ -86,6 +93,7 @@ public class QuadraticSplitter<T extends Boundable> extends NodeSplitter<T> {
 	public Pair<Node<T>, Node<T>> splitNodes(Node<T> nodeToSplit, Node<T> overflowNode) {
 		// create a set of entries mbr
 		ArrayList<Node<T>> records = new ArrayList<Node<T>>();
+
 		for (Node<T> childRecord : nodeToSplit.getChildren()) {
 			records.add(childRecord);
 		}
@@ -94,6 +102,7 @@ public class QuadraticSplitter<T extends Boundable> extends NodeSplitter<T> {
 		Pair<Node<T>, Node<T>> seeds = this.pickSeeds(records);
 		Node<T> L1 = new Node<T>(seeds.getFirst());
 		Node<T> L2 = new Node<T>(seeds.getSecond());
+
 		records.remove(seeds.getFirst());
 		records.remove(seeds.getSecond());
 		// examine remaining entries and add them to either L1 or L2 with the least
@@ -112,5 +121,6 @@ public class QuadraticSplitter<T extends Boundable> extends NodeSplitter<T> {
 			this.pickNext(records, L1, L2);
 		}
 		return new Pair<Node<T>, Node<T>>(L1, L2);
+
 	}
 }

@@ -2,19 +2,28 @@ package src.main.java.com.studql.rtree;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.Stack;
 
+import src.main.java.com.studql.rtree.node.Node;
+import src.main.java.com.studql.rtree.node.NodeDistanceComparator;
+import src.main.java.com.studql.rtree.node.NodeSplitter;
+import src.main.java.com.studql.rtree.node.QuadraticSplitter;
 import src.main.java.com.studql.shape.Boundable;
 import src.main.java.com.studql.shape.Rectangle;
+import src.main.java.com.studql.utils.Pair;
+import src.main.java.com.studql.utils.Record;
 
-public final class Rtree<T extends Boundable> {
+public class Rtree<T extends Boundable> {
 	private final static int DEFAULT_MIN_CHILDREN = 2;
 	private final static int DEFAULT_MAX_CHILDREN = 4;
 
-	private Node<T> root;
-	private int num_entries;
-	private int min_num_records;
-	private int max_num_records;
-	private NodeSplitter<T> splitter;
+	protected Node<T> root;
+	protected int num_entries;
+	protected int min_num_records;
+	protected int max_num_records;
+	protected NodeSplitter<T> splitter;
 
 	public Rtree() {
 		this.num_entries = 0;
@@ -60,17 +69,47 @@ public final class Rtree<T extends Boundable> {
 		} else {
 			this.splitNodeAndReassign(leaf, newNode);
 		}
-//		System.out.println(this.toString());
 		this.num_entries += 1;
 	}
 
-	private Node<T> chooseLeaf(Rectangle recordMbr, Node<T> R) {
-		if (R.isLeaf())
-			return R;
+	public void insert(List<Record<T>> records) {
+		for (Record<T> record : records) {
+			this.insert(record);
+		}
+	}
+
+	protected Node<T> chooseLeaf(Rectangle recordMbr, Node<T> R) {
+		Node<T> current = this.root;
+		while (!current.isLeaf()) {
+			ArrayList<Node<T>> minEnlargedRecords = this.getMinEnlargedRecords(current, recordMbr);
+			if (minEnlargedRecords.size() == 1)
+				current = minEnlargedRecords.get(0);
+			else {
+				// resolve ties if any, by choosing the node with least mbr's area
+				current = this.getMinAreaRecord(minEnlargedRecords);
+			}
+		}
+		return current;
+	}
+
+	protected Node<T> getMinAreaRecord(ArrayList<Node<T>> nodes) {
+		Node<T> minAreaRecord = null;
+		float minArea = Float.MAX_VALUE;
+		for (Node<T> node : nodes) {
+			float area = node.getMbr().area();
+			if (area < minArea) {
+				minAreaRecord = node;
+				minArea = area;
+			}
+		}
+		return minAreaRecord;
+	}
+
+	protected ArrayList<Node<T>> getMinEnlargedRecords(Node<T> current, Rectangle recordMbr) {
 		float minEnlargement = Float.MAX_VALUE;
 		ArrayList<Node<T>> minEnlargedRecords = new ArrayList<Node<T>>();
 		// choose record which mbr's enlarge the less with current record's mbr
-		for (Node<T> child : R.getChildren()) {
+		for (Node<T> child : current.getChildren()) {
 			Rectangle childMbr = child.getMbr();
 			float enlargement = childMbr.calculateEnlargement(recordMbr);
 			if (enlargement == minEnlargement || minEnlargedRecords.size() == 0) {
@@ -82,42 +121,30 @@ public final class Rtree<T extends Boundable> {
 				minEnlargement = enlargement;
 			}
 		}
-		if (minEnlargedRecords.size() == 1)
-			return this.chooseLeaf(recordMbr, minEnlargedRecords.get(0));
-		// resolve ties if any, by choosing the node with least mbr's area
-		Node<T> minAreaRecord = null;
-		float minArea = Float.MAX_VALUE;
-		for (Node<T> node : minEnlargedRecords) {
-			float area = node.getMbr().area();
-			if (area < minArea) {
-				minAreaRecord = node;
-				minArea = area;
-			}
-		}
-		return this.chooseLeaf(recordMbr, minAreaRecord);
+		return minEnlargedRecords;
 	}
 
-	private void adjustTree(Node<T> node, Node<T> createdNode) {
+	protected void adjustTree(Node<T> node, Node<T> createdNode) {
 		Node<T> previousNode = node;
 		// node resulting from split
 		Node<T> splittedNode = createdNode;
 		// while we do not reach root
-		if (!previousNode.isRoot()) {
+		while (!previousNode.isRoot()) {
 			Node<T> previousParent = previousNode.getParent();
 			// updating parent recursively in the no-split case
 			if (splittedNode == null) {
 				previousParent.updateMbr(previousNode.getMbr());
-				this.adjustTree(previousParent, splittedNode);
 			}
 			// see if there is a node overflow, and update accordingly
 			else if (previousParent.numChildren() > this.max_num_records) {
 				previousParent.remove(splittedNode);
 				this.splitNodeAndReassign(previousParent, splittedNode);
 			}
+			previousNode = previousParent;
 		}
 	}
 
-	private void splitNodeAndReassign(Node<T> nodeToSplit, Node<T> overflowNode) {
+	protected void splitNodeAndReassign(Node<T> nodeToSplit, Node<T> overflowNode) {
 		Pair<Node<T>, Node<T>> splittedNodes = this.splitter.splitNodes(nodeToSplit, overflowNode);
 		Node<T> splittedLeft = splittedNodes.getFirst(), splittedRight = splittedNodes.getSecond();
 		if (nodeToSplit == this.root)
@@ -131,7 +158,7 @@ public final class Rtree<T extends Boundable> {
 		}
 	}
 
-	private void assignNewRoot(Node<T> child1, Node<T> child2) {
+	protected void assignNewRoot(Node<T> child1, Node<T> child2) {
 		Node<T> newRoot = new Node<T>();
 		newRoot.add(child1);
 		newRoot.add(child2);
@@ -152,6 +179,14 @@ public final class Rtree<T extends Boundable> {
 		}
 		this.num_entries -= 1;
 		return true;
+	}
+
+	public List<Boolean> delete(List<Record<T>> records) {
+		List<Boolean> deletedRecords = new ArrayList<Boolean>();
+		for (Record<T> record : records) {
+			deletedRecords.add(this.delete(record));
+		}
+		return deletedRecords;
 	}
 
 	private Node<T> findLeafAndRemove(Record<T> record, Node<T> node) {
@@ -212,41 +247,103 @@ public final class Rtree<T extends Boundable> {
 		}
 	}
 
-	public ArrayList<Record<T>> search(Node<T> R, Record<T> record) {
-		Rectangle rec = record.getMbr();
-		ArrayList<Record<T>> result = new ArrayList<Record<T>>();
-		if (!R.isLeaf()) {
-			List<Node<T>> temp = R.getChildren();
-			for (Node<T> n : temp) {
-				if (n.getMbr().isOverLapping(rec))
-					result.addAll(rangeSearch(n, rec));
-			}
-		} else {
-			List<Node<T>> temp = R.getChildren();
-			for (Node<T> n : temp) {
-				if (record.equals(n.getRecord()))
-					result.add(n.getRecord());
+	public Record<T> search(Record<T> record) {
+		Rectangle recordMbr = record.getMbr();
+		Record<T> result = null;
+		// init stack for dfs in valid childs
+		Stack<Node<T>> validNodes = new Stack<Node<T>>();
+		validNodes.push(this.root);
+		// traverse whole tree
+		while (!validNodes.empty() && result == null) {
+			Node<T> currentNode = validNodes.pop();
+			for (Node<T> child : currentNode.getChildren()) {
+				// record node
+				Record<T> childRecord = child.getRecord();
+				if (childRecord != null) {
+					if (childRecord.equals(record)) {
+						result = childRecord;
+						break;
+					}
+				} else if (child.getMbr().contains(recordMbr)) {
+					validNodes.push(child);
+				}
 			}
 		}
 		return result;
 	}
 
-	public ArrayList<Record<T>> rangeSearch(Node<T> R, Rectangle rec) {
+	public List<Record<T>> search(List<Record<T>> records) {
+		List<Record<T>> searchResults = new ArrayList<Record<T>>();
+		for (Record<T> searchRecord : records) {
+			searchResults.add(this.search(searchRecord));
+		}
+		return searchResults;
+	}
+
+	public List<Record<T>> rangeSearch(Rectangle rec) {
 		ArrayList<Record<T>> result = new ArrayList<Record<T>>();
-		if (!R.isLeaf()) {
-			List<Node<T>> temp = R.getChildren();
-			for (Node<T> n : temp) {
-				if (n.getMbr().isOverLapping(rec))
-					result.addAll(rangeSearch(n, rec));
-			}
-		} else {
-			List<Node<T>> temp = R.getChildren();
-			for (Node<T> n : temp) {
-				if (rec.contains(n.getMbr()))
-					result.add(n.getRecord());
+		// init stack for dfs in valid childs
+		Stack<Node<T>> validNodes = new Stack<Node<T>>();
+		// traverse whole tree
+		validNodes.push(this.root);
+		while (!validNodes.empty()) {
+			Node<T> currentNode = validNodes.pop();
+			for (Node<T> child : currentNode.getChildren()) {
+				// record node
+				Record<T> childRecord = child.getRecord();
+				if (childRecord != null) {
+					if (rec.contains(childRecord.getMbr()))
+						result.add(childRecord);
+				} else if (child.getMbr().isOverLapping(rec)) {
+					validNodes.push(child);
+				}
 			}
 		}
 		return result;
+	}
+
+	public List<List<Record<T>>> rangeSearch(List<Rectangle> rectangles) {
+		List<List<Record<T>>> searchResults = new ArrayList<List<Record<T>>>();
+		for (Rectangle r : rectangles) {
+			searchResults.add(this.rangeSearch(r));
+		}
+		return searchResults;
+	}
+
+	public List<Pair<Record<T>, Float>> nearestNeighborsSearch(Record<T> record, int k) {
+		ArrayList<Pair<Record<T>, Float>> result = new ArrayList<Pair<Record<T>, Float>>();
+		Rectangle recordMbr = record.getMbr();
+		// init stack for dfs in valid childs
+		Queue<Node<T>> closestNodes = new PriorityQueue<Node<T>>(new NodeDistanceComparator<T>(recordMbr));
+		// traverse whole tree
+		closestNodes.add(this.root);
+		while (!closestNodes.isEmpty() && k > 0) {
+			Node<T> currentNode = closestNodes.poll();
+			// node record
+			if (currentNode.getRecord() != null) {
+				if (!closestNodes.isEmpty() && currentNode.getMbr().distance(recordMbr) > closestNodes.peek().getMbr()
+						.distance(recordMbr)) {
+					closestNodes.add(currentNode);
+				} else {
+					result.add(new Pair<Record<T>, Float>(currentNode.getRecord(),
+							currentNode.getMbr().distance(recordMbr)));
+					--k;
+				}
+			} else {
+				for (Node<T> child : currentNode.getChildren()) {
+					closestNodes.add(child);
+				}
+			}
+		}
+		return result;
+	}
+
+	public List<List<Pair<Record<T>, Float>>> nearestNeighborsSearch(List<Record<T>> records, int k) {
+		List<List<Pair<Record<T>, Float>>> searchResults = new ArrayList<List<Pair<Record<T>, Float>>>();
+		for (Record<T> r : records) {
+			searchResults.add(this.nearestNeighborsSearch(r, k));
+		}
+		return searchResults;
 	}
 
 	public String toString() {

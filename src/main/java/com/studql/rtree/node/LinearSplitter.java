@@ -1,9 +1,10 @@
-package src.main.java.com.studql.rtree;
+package src.main.java.com.studql.rtree.node;
 
 import java.util.ArrayList;
 
 import src.main.java.com.studql.shape.Boundable;
 import src.main.java.com.studql.shape.Rectangle;
+import src.main.java.com.studql.utils.Pair;
 
 public class LinearSplitter<T extends Boundable> extends NodeSplitter<T>{
 	

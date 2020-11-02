@@ -2,6 +2,9 @@ package src.main.java.com.studql.shape;
 
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
+import java.util.List;
+
+import src.main.java.com.studql.utils.Pair;
 
 public final class Point implements Boundable {
 	private static final int DRAW_SIZE = 3;
@@ -46,6 +49,27 @@ public final class Point implements Boundable {
 
 	public String toString() {
 		return "[" + this.x + ", " + this.y + "]";
+	}
+
+	public float euclidianDistance(Point p) {
+		float xDiff = Math.abs(this.getX() - p.getX());
+		float yDiff = Math.abs(this.getY() - p.getY());
+		return (float) Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
+	}
+
+	public static Pair<Point, Point> getClosestPair(List<Point> firstPoints, List<Point> secondPoints) {
+		Pair<Point, Point> result = null;
+		float minDistance = Float.MAX_VALUE;
+		for (Point pFirst : firstPoints) {
+			for (Point pSecond : secondPoints) {
+				float currentDistance = pFirst.euclidianDistance(pSecond);
+				if (currentDistance < minDistance) {
+					minDistance = currentDistance;
+					result = new Pair<Point, Point>(pFirst, pSecond);
+				}
+			}
+		}
+		return result;
 	}
 
 	public Shape draw(float dim1, float dim2, float dim3, float dim4) {
