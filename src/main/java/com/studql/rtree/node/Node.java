@@ -1,16 +1,19 @@
-package src.main.java.com.studql.rtree.node;
+package com.studql.rtree.node;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import src.main.java.com.studql.shape.Boundable;
-import src.main.java.com.studql.shape.Rectangle;
-import src.main.java.com.studql.utils.Record;
+import com.studql.shape.Boundable;
+import com.studql.shape.Rectangle;
+import com.studql.utils.Record;
 
-public class Node<T extends Boundable> {
+public class Node<T extends Boundable> implements Serializable {
+
+	private static final long serialVersionUID = 6452773195185334541L;
 	private Rectangle mbr = null;
 	private Node<T> parent = null;
 	// nodes all have a list of child nodes, and it's the same for leaves, only

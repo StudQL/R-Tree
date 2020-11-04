@@ -1,9 +1,12 @@
-package src.main.java.com.studql.utils;
+package com.studql.utils;
 
-import src.main.java.com.studql.shape.Boundable;
-import src.main.java.com.studql.shape.Rectangle;
+import java.io.Serializable;
 
-public final class Record<T extends Boundable> {
+import com.studql.shape.Boundable;
+import com.studql.shape.Rectangle;
+
+public class Record<T extends Boundable> implements Serializable {
+	private static final long serialVersionUID = -8270017566173656873L;
 	private final String identifier;
 	private final T value;
 

@@ -1,6 +1,10 @@
-package src.main.java.com.studql.utils;
+package com.studql.utils;
 
-public class Pair<T, U> {
+import java.io.Serializable;
+
+public class Pair<T, U> implements Serializable {
+
+	private static final long serialVersionUID = 228514587678063324L;
 	private T val1;
 	private U val2;
 

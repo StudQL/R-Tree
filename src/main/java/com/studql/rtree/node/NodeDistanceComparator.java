@@ -1,9 +1,9 @@
-package src.main.java.com.studql.rtree.node;
+package com.studql.rtree.node;
 
 import java.util.Comparator;
 
-import src.main.java.com.studql.shape.Boundable;
-import src.main.java.com.studql.shape.Rectangle;
+import com.studql.shape.Boundable;
+import com.studql.shape.Rectangle;
 
 public class NodeDistanceComparator<T extends Boundable> implements Comparator<Node<T>> {
 	private Rectangle objectMbr;

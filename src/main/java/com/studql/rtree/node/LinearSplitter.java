@@ -1,13 +1,13 @@
-package src.main.java.com.studql.rtree.node;
+package com.studql.rtree.node;
 
 import java.util.ArrayList;
 
-import src.main.java.com.studql.shape.Boundable;
-import src.main.java.com.studql.shape.Rectangle;
-import src.main.java.com.studql.utils.Pair;
+import com.studql.shape.Boundable;
+import com.studql.shape.Rectangle;
+import com.studql.utils.Pair;
 
-public class LinearSplitter<T extends Boundable> extends NodeSplitter<T>{
-	
+public class LinearSplitter<T extends Boundable> extends NodeSplitter<T> {
+
 	private int min_num_records;
 
 	public LinearSplitter(int min_num_records) {
@@ -15,12 +15,12 @@ public class LinearSplitter<T extends Boundable> extends NodeSplitter<T>{
 	}
 
 	/*
-	This method picks the 2 rectangles we use to make the 2 new nodes using the 
-	Linear Splitting method
-	*/
+	 * This method picks the 2 rectangles we use to make the 2 new nodes using the
+	 * Linear Splitting method
+	 */
 	protected Pair<Node<T>, Node<T>> pickSeeds(ArrayList<Node<T>> records) {
 		Pair<Node<T>, Node<T>> NewNodes = null;
-		
+
 		Node<T> E = records.get(0);
 		Rectangle EMbr = E.getMbr();
 		float lowest = EMbr.lowest();
@@ -31,7 +31,8 @@ public class LinearSplitter<T extends Boundable> extends NodeSplitter<T>{
 			Rectangle EMbri = Ei.getMbr();
 			float lowxy = EMbri.lowest();
 			float highxy = EMbri.highest();
-			// check whether the current rectangle is higher or lower than the highest and lowest
+			// check whether the current rectangle is higher or lower than the highest and
+			// lowest
 			// rectangle we have so far
 			if (lowxy < lowest) {
 				lowest = lowxy;
@@ -44,7 +45,7 @@ public class LinearSplitter<T extends Boundable> extends NodeSplitter<T>{
 		}
 		NewNodes = new Pair<Node<T>, Node<T>>(EL, EH);
 
-		//System.out.println(EH.getMbr().toString() + highest);
+		// System.out.println(EH.getMbr().toString() + highest);
 		return NewNodes;
 	}
 

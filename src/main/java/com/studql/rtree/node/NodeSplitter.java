@@ -1,11 +1,14 @@
-package src.main.java.com.studql.rtree.node;
+package com.studql.rtree.node;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-import src.main.java.com.studql.shape.Boundable;
-import src.main.java.com.studql.utils.Pair;
+import com.studql.shape.Boundable;
+import com.studql.utils.Pair;
 
-public abstract class NodeSplitter<T extends Boundable> {
+public abstract class NodeSplitter<T extends Boundable> implements Serializable {
+	private static final long serialVersionUID = -354860141461294328L;
+
 	abstract public Pair<Node<T>, Node<T>> splitNodes(Node<T> nodeToSplit, Node<T> overflowNode);
 
 	abstract protected Pair<Node<T>, Node<T>> pickSeeds(ArrayList<Node<T>> records);

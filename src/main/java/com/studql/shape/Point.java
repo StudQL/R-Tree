@@ -1,12 +1,15 @@
-package src.main.java.com.studql.shape;
+package com.studql.shape;
 
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
+import java.io.Serializable;
 import java.util.List;
 
-import src.main.java.com.studql.utils.Pair;
+import com.studql.utils.Pair;
 
-public final class Point implements Boundable {
+public final class Point implements Boundable, Serializable, Comparable<Point> {
+
+	private static final long serialVersionUID = 6795023477825593653L;
 	private static final int DRAW_SIZE = 3;
 	private final float x;
 	private final float y;
@@ -30,7 +33,7 @@ public final class Point implements Boundable {
 	public Rectangle getMbr() {
 		return this.mbr;
 	}
-	
+
 	public float SumCoord() {
 		return x + y;
 	}
@@ -74,6 +77,12 @@ public final class Point implements Boundable {
 
 	public Shape draw(float dim1, float dim2, float dim3, float dim4) {
 		return new Ellipse2D.Float(dim1 - DRAW_SIZE, dim2 - DRAW_SIZE, DRAW_SIZE * 2, DRAW_SIZE * 2);
+	}
+
+	public int compareTo(Point p) {
+		double instanceDistanceToOrigin = Math.sqrt(x * x + y * y);
+		double pDistanceToOrigin = Math.sqrt(p.getX() * p.getX() + p.getY() * p.getY());
+		return Double.compare(instanceDistanceToOrigin, pDistanceToOrigin);
 	}
 
 }

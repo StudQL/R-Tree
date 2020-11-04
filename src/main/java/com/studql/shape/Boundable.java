@@ -1,4 +1,4 @@
-package src.main.java.com.studql.shape;
+package com.studql.shape;
 
 import java.awt.Shape;
 

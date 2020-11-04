@@ -1,7 +1,7 @@
-package src.main.java.com.studql.rtree.callables;
+package com.studql.rtree.callables;
 
-import src.main.java.com.studql.rtree.RtreeMulti;
-import src.main.java.com.studql.shape.Boundable;
+import com.studql.rtree.RtreeMulti;
+import com.studql.shape.Boundable;
 
 public abstract class TreeBaseCallable<T extends Boundable> {
 	protected RtreeMulti<T> tree;

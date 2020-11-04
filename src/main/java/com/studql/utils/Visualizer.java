@@ -1,4 +1,4 @@
-package src.main.java.com.studql.utils;
+package com.studql.utils;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -11,11 +11,11 @@ import java.util.Queue;
 
 import javax.imageio.ImageIO;
 
-import src.main.java.com.studql.rtree.Rtree;
-import src.main.java.com.studql.rtree.node.Node;
-import src.main.java.com.studql.shape.Boundable;
-import src.main.java.com.studql.shape.Point;
-import src.main.java.com.studql.shape.Rectangle;
+import com.studql.rtree.Rtree;
+import com.studql.rtree.node.Node;
+import com.studql.shape.Boundable;
+import com.studql.shape.Point;
+import com.studql.shape.Rectangle;
 
 public class Visualizer<T extends Boundable> {
 	private final int image_size;
@@ -30,15 +30,6 @@ public class Visualizer<T extends Boundable> {
 
 	public Visualizer(int image_size) {
 		this.image_size = image_size;
-	}
-
-	private float interpolatePoint(float value, float[] valueRange, float[] referenceRange) {
-		return referenceRange[0]
-				+ (value - valueRange[0]) * ((referenceRange[1] - referenceRange[0]) / (valueRange[1] - valueRange[0]));
-	}
-
-	private float interpolateLine(float value, float[] valueRange, float[] referenceRange) {
-		return (value / (valueRange[1] - valueRange[0])) * (referenceRange[1] - referenceRange[0]);
 	}
 
 	private int[] getDrawingDimensions(Rectangle nodeMbr, float[] rootMbrWidthRange, float[] rootMbrHeightRange) {
@@ -72,10 +63,10 @@ public class Visualizer<T extends Boundable> {
 					(mbrHeight - borderRatio) * (this.image_size - 2 * PADDING) / mbrHeight };
 		}
 		// create drawing bounds
-		int boundedX = Math.round(this.interpolatePoint(x, rootMbrWidthRange, widthReferenceRange));
-		int boundedY = Math.round(this.interpolatePoint(y, floatYRange, heightReferenceRange));
-		int boundedWidth = Math.round(this.interpolateLine(width, rootMbrWidthRange, widthReferenceRange));
-		int boundedHeight = Math.round(this.interpolateLine(height, rootMbrHeightRange, heightReferenceRange));
+		int boundedX = Math.round(Benchmark.interpolatePoint(x, rootMbrWidthRange, widthReferenceRange));
+		int boundedY = Math.round(Benchmark.interpolatePoint(y, floatYRange, heightReferenceRange));
+		int boundedWidth = Math.round(Benchmark.interpolateLine(width, rootMbrWidthRange, widthReferenceRange));
+		int boundedHeight = Math.round(Benchmark.interpolateLine(height, rootMbrHeightRange, heightReferenceRange));
 		return new int[] { boundedX, boundedY, boundedWidth, boundedHeight };
 	}
 
@@ -96,7 +87,7 @@ public class Visualizer<T extends Boundable> {
 	private void drawInternalNode(Graphics2D g, Node<T> node, float[] rootMbrWidthRange, float[] rootMbrHeightRange,
 			int nodeHeight, int treeHeight) {
 		// level of green
-		float interpolatedWithHeight = this.interpolatePoint(nodeHeight, new float[] { treeHeight, 0 },
+		float interpolatedWithHeight = Benchmark.interpolatePoint(nodeHeight, new float[] { treeHeight, 0 },
 				new float[] { 0, 255 });
 		int interpolatedGreenValue = Math.round(interpolatedWithHeight);
 		// create colors proportional to depth of node

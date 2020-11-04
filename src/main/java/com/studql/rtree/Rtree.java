@@ -1,21 +1,24 @@
-package src.main.java.com.studql.rtree;
+package com.studql.rtree;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Stack;
 
-import src.main.java.com.studql.rtree.node.Node;
-import src.main.java.com.studql.rtree.node.NodeDistanceComparator;
-import src.main.java.com.studql.rtree.node.NodeSplitter;
-import src.main.java.com.studql.rtree.node.QuadraticSplitter;
-import src.main.java.com.studql.shape.Boundable;
-import src.main.java.com.studql.shape.Rectangle;
-import src.main.java.com.studql.utils.Pair;
-import src.main.java.com.studql.utils.Record;
+import com.studql.rtree.node.Node;
+import com.studql.rtree.node.NodeDistanceComparator;
+import com.studql.rtree.node.NodeSplitter;
+import com.studql.rtree.node.QuadraticSplitter;
+import com.studql.shape.Boundable;
+import com.studql.shape.Rectangle;
+import com.studql.utils.Pair;
+import com.studql.utils.Record;
 
-public class Rtree<T extends Boundable> {
+public class Rtree<T extends Boundable> implements Serializable {
+
+	private static final long serialVersionUID = 2268374763865418514L;
 	private final static int DEFAULT_MIN_CHILDREN = 2;
 	private final static int DEFAULT_MAX_CHILDREN = 4;
 

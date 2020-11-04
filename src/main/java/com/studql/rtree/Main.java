@@ -1,4 +1,4 @@
-package src.main.java.com.studql.rtree;
+package com.studql.rtree;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,18 +11,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
-import src.main.java.com.studql.rtree.callables.TreeDeleteCallable;
-import src.main.java.com.studql.rtree.callables.TreeInsertCallable;
-import src.main.java.com.studql.rtree.callables.TreeKNNSearchCallable;
-import src.main.java.com.studql.rtree.callables.TreeRangeSearchCallable;
-import src.main.java.com.studql.rtree.callables.TreeSearchCallable;
-import src.main.java.com.studql.rtree.node.QuadraticSplitter;
-import src.main.java.com.studql.shape.Point;
-import src.main.java.com.studql.shape.Rectangle;
-import src.main.java.com.studql.utils.Benchmark;
-import src.main.java.com.studql.utils.Pair;
-import src.main.java.com.studql.utils.Record;
-import src.main.java.com.studql.utils.Visualizer;
+import com.studql.rtree.callables.TreeDeleteCallable;
+import com.studql.rtree.callables.TreeInsertCallable;
+import com.studql.rtree.callables.TreeKNNSearchCallable;
+import com.studql.rtree.callables.TreeRangeSearchCallable;
+import com.studql.rtree.callables.TreeSearchCallable;
+import com.studql.rtree.node.QuadraticSplitter;
+import com.studql.shape.Point;
+import com.studql.shape.Rectangle;
+import com.studql.utils.Benchmark;
+import com.studql.utils.Pair;
+import com.studql.utils.Record;
+import com.studql.utils.Visualizer;
 
 public class Main {
 
@@ -82,7 +82,17 @@ public class Main {
 		};
 		// create data points
 		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
-		Point[] points = b.generateRandomPoints(1000, new int[] { 0, 1000 }, new int[] { 100, 1000 });
+		Point[] points = Benchmark.generateRandomPoints(10000, new int[] { 0, 1000 }, new int[] { 100, 1000 });
+//		try {
+//			FileWriter f = new FileWriter("C:\\Users\\alzajac\\Downloads\\10_000_random.txt");
+//			for (Point p : points) {
+//				f.write(p.getX() + " " + p.getY() + "\n");
+//			}
+//			f.close();
+//		} catch (IOException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
 		List<Record<Point>> records = b.generateRecordsPoints(points);
 		for (Record<Point> r : records) {
 			tree.insert(r);
@@ -103,11 +113,11 @@ public class Main {
 		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
-		Rectangle[] rectangles = b.generateRandomRectangles(num_datapoints, xRange, yRange);
+		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
 		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
 
 		// create search data points
-		Rectangle[] searchRectangles = b.generateRandomRectangles(num_search_points, xRange, yRange);
+		Rectangle[] searchRectangles = Benchmark.generateRandomRectangles(num_search_points, xRange, yRange);
 		List<Record<Rectangle>> searchRecords = b.generateRecordsRectangle(searchRectangles);
 
 		// init tree and Executor
@@ -157,11 +167,12 @@ public class Main {
 		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
-		Rectangle[] rectangles = b.generateRandomRectangles(num_datapoints, xRange, yRange);
+		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
 		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
 
 		// create search data points
-		List<Rectangle> searchRectangles = Arrays.asList(b.generateRandomRectangles(num_search_points, xRange, yRange));
+		List<Rectangle> searchRectangles = Arrays
+				.asList(Benchmark.generateRandomRectangles(num_search_points, xRange, yRange));
 		;
 
 		// init tree and Executor
@@ -210,11 +221,11 @@ public class Main {
 		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
-		Rectangle[] rectangles = b.generateRandomRectangles(num_datapoints, xRange, yRange);
+		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
 		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
 
 		// create search data points
-		Rectangle[] searchRectangles = b.generateRandomRectangles(num_search_points, xRange, yRange);
+		Rectangle[] searchRectangles = Benchmark.generateRandomRectangles(num_search_points, xRange, yRange);
 		List<Record<Rectangle>> searchRecords = b.generateRecordsRectangle(searchRectangles);
 
 		// init tree and Executor
@@ -264,7 +275,7 @@ public class Main {
 		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
-		Rectangle[] rectangles = b.generateRandomRectangles(num_datapoints, xRange, yRange);
+		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
 		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
 
 		// init tree and Executor
@@ -314,7 +325,7 @@ public class Main {
 		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
-		Rectangle[] rectangles = b.generateRandomRectangles(num_datapoints, xRange, yRange);
+		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
 		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
 
 		// init tree and Executor
@@ -348,7 +359,7 @@ public class Main {
 		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
-		Rectangle[] rectangles = b.generateRandomRectangles(num_datapoints, xRange, yRange);
+		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
 		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
 
 		// init tree and Executor
@@ -366,7 +377,7 @@ public class Main {
 		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
-		Rectangle[] rectangles = b.generateRandomRectangles(num_datapoints, xRange, yRange);
+		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
 		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
 
 		// init tree and Executor
@@ -386,11 +397,11 @@ public class Main {
 		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
-		Rectangle[] rectangles = b.generateRandomRectangles(num_datapoints, xRange, yRange);
+		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
 		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
 
 		// create search data points
-		Rectangle[] searchRectangles = b.generateRandomRectangles(num_search_points, xRange, yRange);
+		Rectangle[] searchRectangles = Benchmark.generateRandomRectangles(num_search_points, xRange, yRange);
 		List<Record<Rectangle>> searchRecords = b.generateRecordsRectangle(searchRectangles);
 
 		// init tree and Executor
@@ -417,11 +428,12 @@ public class Main {
 		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
-		Rectangle[] rectangles = b.generateRandomRectangles(num_datapoints, xRange, yRange);
+		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
 		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
 
 		// create search data points
-		List<Rectangle> searchRectangles = Arrays.asList(b.generateRandomRectangles(num_search_points, xRange, yRange));
+		List<Rectangle> searchRectangles = Arrays
+				.asList(Benchmark.generateRandomRectangles(num_search_points, xRange, yRange));
 
 		// init tree and Executor
 		Rtree<Rectangle> tree = new Rtree<Rectangle>();
@@ -446,11 +458,11 @@ public class Main {
 		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
-		Rectangle[] rectangles = b.generateRandomRectangles(num_datapoints, xRange, yRange);
+		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
 		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
 
 		// create search data points
-		Rectangle[] searchRectangles = b.generateRandomRectangles(num_search_points, xRange, yRange);
+		Rectangle[] searchRectangles = Benchmark.generateRandomRectangles(num_search_points, xRange, yRange);
 		List<Record<Rectangle>> searchRecords = b.generateRecordsRectangle(searchRectangles);
 
 		// init tree and Executor
@@ -501,7 +513,6 @@ public class Main {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
 
 }

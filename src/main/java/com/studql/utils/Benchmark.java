@@ -1,4 +1,4 @@
-package src.main.java.com.studql.utils;
+package com.studql.utils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -8,40 +8,49 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import src.main.java.com.studql.rtree.Rtree;
-import src.main.java.com.studql.rtree.node.LinearSplitter;
-import src.main.java.com.studql.rtree.node.NodeSplitter;
-import src.main.java.com.studql.rtree.node.QuadraticSplitter;
-import src.main.java.com.studql.shape.Point;
-import src.main.java.com.studql.shape.Rectangle;
+import com.studql.rtree.Rtree;
+import com.studql.rtree.node.LinearSplitter;
+import com.studql.rtree.node.NodeSplitter;
+import com.studql.shape.Point;
+import com.studql.shape.Rectangle;
 
-public class Benchmark{
+public class Benchmark {
 	private String fileLocation;
+
 	public Benchmark(String fileLocation) {
 		this.fileLocation = fileLocation;
 	}
 
-	private int getRandomInRange(int min, int max) {
+	public static int getRandomInRange(int min, int max) {
 		return (int) ((Math.random() * (max - min)) + min);
 	}
 
-	public Point[] generateRandomPoints(int n, int[] xRange, int[] yRange) {
+	public static float interpolatePoint(float value, float[] valueRange, float[] referenceRange) {
+		return referenceRange[0]
+				+ (value - valueRange[0]) * ((referenceRange[1] - referenceRange[0]) / (valueRange[1] - valueRange[0]));
+	}
+
+	public static float interpolateLine(float value, float[] valueRange, float[] referenceRange) {
+		return (value / (valueRange[1] - valueRange[0])) * (referenceRange[1] - referenceRange[0]);
+	}
+
+	public static Point[] generateRandomPoints(int n, int[] xRange, int[] yRange) {
 		Point[] dataPoints = new Point[n];
 		for (int i = 0; i < n; ++i) {
-			int x = this.getRandomInRange(xRange[0], xRange[1]);
-			int y = this.getRandomInRange(yRange[0], yRange[1]);
+			int x = getRandomInRange(xRange[0], xRange[1]);
+			int y = getRandomInRange(yRange[0], yRange[1]);
 			dataPoints[i] = new Point(x, y);
 		}
 		return dataPoints;
 	}
 
-	public Rectangle[] generateRandomRectangles(int n, int[] xRange, int[] yRange) {
+	public static Rectangle[] generateRandomRectangles(int n, int[] xRange, int[] yRange) {
 		Rectangle[] dataPoints = new Rectangle[n];
 		for (int i = 0; i < n; ++i) {
-			int xBottomRight = this.getRandomInRange(xRange[0], xRange[1]);
-			int yBottomRight = this.getRandomInRange(yRange[0], yRange[1]);
-			int xTopLeft = this.getRandomInRange(xRange[0], xBottomRight);
-			int yTopLeft = this.getRandomInRange(yBottomRight, yRange[1]);
+			int xBottomRight = getRandomInRange(xRange[0], xRange[1]);
+			int yBottomRight = getRandomInRange(yRange[0], yRange[1]);
+			int xTopLeft = getRandomInRange(xRange[0], xBottomRight);
+			int yTopLeft = getRandomInRange(yBottomRight, yRange[1]);
 			dataPoints[i] = new Rectangle(new Point(xTopLeft, yTopLeft), new Point(xBottomRight, yBottomRight));
 		}
 		return dataPoints;
@@ -68,7 +77,7 @@ public class Benchmark{
 	public void benchmarkInsertWithRandomPoints(int num_datapoints, int[] xRange, int[] yRange, int[] page_sizes,
 			List<Function<Integer, Integer>> min_size_operations, boolean shouldVisualize) {
 		// generate random records
-		Point[] dataPoints = this.generateRandomPoints(num_datapoints, xRange, yRange);
+		Point[] dataPoints = generateRandomPoints(num_datapoints, xRange, yRange);
 		ArrayList<Record<Point>> records = new ArrayList<Record<Point>>();
 		for (int i = 0; i < dataPoints.length; i++)
 			records.add(new Record<Point>(dataPoints[i], Integer.toString(i)));
@@ -85,7 +94,7 @@ public class Benchmark{
 	public void benchmarkInsertWithRandomRectangles(int num_datapoints, int[] xRange, int[] yRange, int[] page_sizes,
 			List<Function<Integer, Integer>> min_size_operations, boolean shouldVisualize) {
 		// generate random records
-		Rectangle[] dataPoints = this.generateRandomRectangles(num_datapoints, xRange, yRange);
+		Rectangle[] dataPoints = generateRandomRectangles(num_datapoints, xRange, yRange);
 		ArrayList<Record<Rectangle>> records = new ArrayList<Record<Rectangle>>();
 		for (int i = 0; i < dataPoints.length; i++)
 			records.add(new Record<Rectangle>(dataPoints[i], Integer.toString(i)));
@@ -96,7 +105,7 @@ public class Benchmark{
 			boolean shouldVisualize, ArrayList<Record<Rectangle>> records) {
 		// generate combinations of Rtrees
 		for (int max_page_size : page_sizes) {
-			for (var operation : min_size_operations) {
+			for (Function<Integer, Integer> operation : min_size_operations) {
 				int min_page_size = operation.apply(max_page_size);
 				NodeSplitter<Rectangle> splitter = new LinearSplitter<Rectangle>(min_page_size);
 				Rtree<Rectangle> tree = new Rtree<Rectangle>(min_page_size, max_page_size, splitter);
@@ -107,8 +116,8 @@ public class Benchmark{
 					Visualizer<Rectangle> v = new Visualizer<Rectangle>();
 					try {
 						String splitter_type = splitter instanceof LinearSplitter<?> ? "Quadratic" : "Linear";
-						v.createVisualization(tree, new File(this.fileLocation + "m=" + min_page_size
-								+ "M=" + max_page_size + "splitter=" + splitter_type + ".png"));
+						v.createVisualization(tree, new File(this.fileLocation + "m=" + min_page_size + "M="
+								+ max_page_size + "splitter=" + splitter_type + ".png"));
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -123,7 +132,7 @@ public class Benchmark{
 			boolean shouldVisualize, ArrayList<Record<Point>> records) {
 		// generate combinations of Rtrees
 		for (int max_page_size : page_sizes) {
-			for (var operation : min_size_operations) {
+			for (Function<Integer, Integer> operation : min_size_operations) {
 				int min_page_size = operation.apply(max_page_size);
 				NodeSplitter<Point> splitter = new LinearSplitter<Point>(min_page_size);
 				Rtree<Point> tree = new Rtree<Point>(min_page_size, max_page_size, splitter);
@@ -134,8 +143,8 @@ public class Benchmark{
 					Visualizer<Point> v = new Visualizer<Point>();
 					try {
 						String splitter_type = splitter instanceof LinearSplitter<?> ? "Quadratic" : "Linear";
-						v.createVisualization(tree, new File(this.fileLocation + "m=" + min_page_size
-								+ "M=" + max_page_size + "splitter=" + splitter_type + ".png"));
+						v.createVisualization(tree, new File(this.fileLocation + "m=" + min_page_size + "M="
+								+ max_page_size + "splitter=" + splitter_type + ".png"));
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

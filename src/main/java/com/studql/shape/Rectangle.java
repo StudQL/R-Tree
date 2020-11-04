@@ -1,13 +1,16 @@
-package src.main.java.com.studql.shape;
+package com.studql.shape;
 
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import src.main.java.com.studql.utils.Pair;
+import com.studql.utils.Pair;
 
-public final class Rectangle implements Boundable {
+public final class Rectangle implements Boundable, Serializable, Comparable<Rectangle> {
+
+	private static final long serialVersionUID = 685100720547490483L;
 	private final Point topLeft;
 	private final Point bottomRight;
 	private final Point topRight;
@@ -53,11 +56,11 @@ public final class Rectangle implements Boundable {
 	public Rectangle getMbr() {
 		return this;
 	}
-	
+
 	public float lowest() {
 		return topRight.SumCoord();
 	}
-	
+
 	public float highest() {
 		return bottomLeft.SumCoord();
 	}
@@ -75,15 +78,15 @@ public final class Rectangle implements Boundable {
 				&& r.bottomLeft.equals(this.bottomLeft) && r.bottomRight.equals(this.bottomRight);
 	}
 
-	private static Float[] getMinMaxDimensions(Rectangle r) {
+	public static float[] getMinMaxDimensions(Rectangle r) {
 		float minX = r.topLeft.getX(), maxY = r.topLeft.getY();
 		float maxX = r.bottomRight.getX(), minY = r.bottomRight.getY();
-		return new Float[] { minX, maxX, minY, maxY };
+		return new float[] { minX, maxX, minY, maxY };
 	}
 
 	public static Rectangle buildRectangle(Rectangle r1, Rectangle r2) {
-		Float[] r1Limits = getMinMaxDimensions(r1);
-		Float[] r2Limits = getMinMaxDimensions(r2);
+		float[] r1Limits = getMinMaxDimensions(r1);
+		float[] r2Limits = getMinMaxDimensions(r2);
 		float minX = Math.min(r1Limits[0], r2Limits[0]);
 		float maxX = Math.max(r1Limits[1], r2Limits[1]);
 		float minY = Math.min(r1Limits[2], r2Limits[2]);
@@ -92,8 +95,8 @@ public final class Rectangle implements Boundable {
 	}
 
 	public boolean contains(Rectangle r) {
-		Float[] minInstanceDimensions = getMinMaxDimensions(this);
-		Float[] minRectDimensions = getMinMaxDimensions(r);
+		float[] minInstanceDimensions = getMinMaxDimensions(this);
+		float[] minRectDimensions = getMinMaxDimensions(r);
 		return minInstanceDimensions[0] <= minRectDimensions[0] && minInstanceDimensions[1] >= minRectDimensions[1]
 				&& minInstanceDimensions[2] <= minRectDimensions[2] && minInstanceDimensions[3] >= minRectDimensions[3];
 	}
@@ -175,6 +178,15 @@ public final class Rectangle implements Boundable {
 
 	public Shape draw(float dim1, float dim2, float dim3, float dim4) {
 		return new Rectangle2D.Float(dim1, dim2, dim3, dim4);
+	}
+
+	public int compareTo(Rectangle r) {
+		Point instanceCenter = getCenter();
+		Point rCenter = r.getCenter();
+		double instanceDistanceToOrigin = Math
+				.sqrt(instanceCenter.getX() * instanceCenter.getX() + instanceCenter.getY() * instanceCenter.getY());
+		double rDistanceToOrigin = Math.sqrt(rCenter.getX() * rCenter.getX() + rCenter.getY() * rCenter.getY());
+		return Double.compare(instanceDistanceToOrigin, rDistanceToOrigin);
 	}
 
 }

@@ -1,10 +1,10 @@
-package src.main.java.com.studql.rtree.node;
+package com.studql.rtree.node;
 
 import java.util.ArrayList;
 
-import src.main.java.com.studql.shape.Boundable;
-import src.main.java.com.studql.shape.Rectangle;
-import src.main.java.com.studql.utils.Pair;
+import com.studql.shape.Boundable;
+import com.studql.shape.Rectangle;
+import com.studql.utils.Pair;
 
 public class QuadraticSplitter<T extends Boundable> extends NodeSplitter<T> {
 

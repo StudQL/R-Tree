@@ -1,12 +1,12 @@
-package src.main.java.com.studql.rtree.callables;
+package com.studql.rtree.callables;
 
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import src.main.java.com.studql.rtree.RtreeMulti;
-import src.main.java.com.studql.shape.Boundable;
-import src.main.java.com.studql.utils.Pair;
-import src.main.java.com.studql.utils.Record;
+import com.studql.rtree.RtreeMulti;
+import com.studql.shape.Boundable;
+import com.studql.utils.Pair;
+import com.studql.utils.Record;
 
 public class TreeKNNSearchCallable<T extends Boundable> extends TreeBaseCallable<T>
 		implements Callable<List<List<Pair<Record<T>, Float>>>> {

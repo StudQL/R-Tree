@@ -1,4 +1,4 @@
-package src.main.java.com.studql.rtree;
+package com.studql.rtree;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,13 +8,13 @@ import java.util.Stack;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import src.main.java.com.studql.rtree.node.Node;
-import src.main.java.com.studql.rtree.node.NodeDistanceComparator;
-import src.main.java.com.studql.rtree.node.NodeSplitter;
-import src.main.java.com.studql.shape.Boundable;
-import src.main.java.com.studql.shape.Rectangle;
-import src.main.java.com.studql.utils.Pair;
-import src.main.java.com.studql.utils.Record;
+import com.studql.rtree.node.Node;
+import com.studql.rtree.node.NodeDistanceComparator;
+import com.studql.rtree.node.NodeSplitter;
+import com.studql.shape.Boundable;
+import com.studql.shape.Rectangle;
+import com.studql.utils.Pair;
+import com.studql.utils.Record;
 
 public class RtreeMulti<T extends Boundable> extends Rtree<T> {
 	private Lock rootLock = new ReentrantLock();
