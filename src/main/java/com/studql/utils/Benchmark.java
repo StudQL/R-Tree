@@ -21,7 +21,7 @@ public class Benchmark {
 		this.fileLocation = fileLocation;
 	}
 
-	public static int getRandomInRange(int min, int max) {
+	public static int getRandomInRange(float min, float max) {
 		return (int) ((Math.random() * (max - min)) + min);
 	}
 
@@ -34,7 +34,7 @@ public class Benchmark {
 		return (value / (valueRange[1] - valueRange[0])) * (referenceRange[1] - referenceRange[0]);
 	}
 
-	public static Point[] generateRandomPoints(int n, int[] xRange, int[] yRange) {
+	public static Point[] generateRandomPoints(int n, float[] xRange, float[] yRange) {
 		Point[] dataPoints = new Point[n];
 		for (int i = 0; i < n; ++i) {
 			int x = getRandomInRange(xRange[0], xRange[1]);
@@ -44,7 +44,7 @@ public class Benchmark {
 		return dataPoints;
 	}
 
-	public static Rectangle[] generateRandomRectangles(int n, int[] xRange, int[] yRange) {
+	public static Rectangle[] generateRandomRectangles(int n, float[] xRange, float[] yRange) {
 		Rectangle[] dataPoints = new Rectangle[n];
 		for (int i = 0; i < n; ++i) {
 			int xBottomRight = getRandomInRange(xRange[0], xRange[1]);
@@ -56,7 +56,7 @@ public class Benchmark {
 		return dataPoints;
 	}
 
-	public List<Record<Rectangle>> generateRecordsRectangle(Rectangle[] rectangles) {
+	public static List<Record<Rectangle>> generateRecordsRectangle(Rectangle[] rectangles) {
 		List<Record<Rectangle>> records = new ArrayList<Record<Rectangle>>();
 		int id = 0;
 		for (Rectangle r : rectangles) {
@@ -65,7 +65,7 @@ public class Benchmark {
 		return records;
 	}
 
-	public List<Record<Point>> generateRecordsPoints(Point[] points) {
+	public static List<Record<Point>> generateRecordsPoints(Point[] points) {
 		List<Record<Point>> records = new ArrayList<Record<Point>>();
 		int id = 0;
 		for (Point p : points) {
@@ -74,7 +74,7 @@ public class Benchmark {
 		return records;
 	}
 
-	public void benchmarkInsertWithRandomPoints(int num_datapoints, int[] xRange, int[] yRange, int[] page_sizes,
+	public void benchmarkInsertWithRandomPoints(int num_datapoints, float[] xRange, float[] yRange, int[] page_sizes,
 			List<Function<Integer, Integer>> min_size_operations, boolean shouldVisualize) {
 		// generate random records
 		Point[] dataPoints = generateRandomPoints(num_datapoints, xRange, yRange);
@@ -91,8 +91,8 @@ public class Benchmark {
 		launchPointBenchmark(page_sizes, min_size_operations, shouldVisualize, records);
 	}
 
-	public void benchmarkInsertWithRandomRectangles(int num_datapoints, int[] xRange, int[] yRange, int[] page_sizes,
-			List<Function<Integer, Integer>> min_size_operations, boolean shouldVisualize) {
+	public void benchmarkInsertWithRandomRectangles(int num_datapoints, float[] xRange, float[] yRange,
+			int[] page_sizes, List<Function<Integer, Integer>> min_size_operations, boolean shouldVisualize) {
 		// generate random records
 		Rectangle[] dataPoints = generateRandomRectangles(num_datapoints, xRange, yRange);
 		ArrayList<Record<Rectangle>> records = new ArrayList<Record<Rectangle>>();

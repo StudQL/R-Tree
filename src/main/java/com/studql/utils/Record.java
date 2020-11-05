@@ -49,4 +49,5 @@ public class Record<T extends Boundable> implements Serializable {
 		strBuilder.append(", value=" + this.value.toString() + ")");
 		return strBuilder.toString();
 	}
+
 }

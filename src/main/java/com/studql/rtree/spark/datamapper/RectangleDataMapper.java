@@ -8,6 +8,7 @@ import java.util.List;
 import com.studql.shape.Rectangle;
 import com.studql.utils.Benchmark;
 import com.studql.utils.Pair;
+import com.studql.utils.Record;
 
 public class RectangleDataMapper extends DataMapper<Rectangle> implements Serializable {
 
@@ -21,19 +22,21 @@ public class RectangleDataMapper extends DataMapper<Rectangle> implements Serial
 		this.hasHeader = hasHeader;
 	}
 
-	private Iterator<Rectangle> selectIterator(List<Rectangle> result, float[] xRange, float[] yRange, float minX,
-			float maxX, float minY, float maxY) {
+	private Iterator<Record<Rectangle>> selectIterator(List<Record<Rectangle>> result, float[] xRange, float[] yRange,
+			float minX, float maxX, float minY, float maxY) {
 		if (xRange != null && yRange != null) {
-			List<Rectangle> interpolatedResult = new ArrayList<Rectangle>();
+			List<Record<Rectangle>> interpolatedResult = new ArrayList<Record<Rectangle>>();
 			float[] initialXRange = new float[] { minX, maxX };
 			float[] initialYRange = new float[] { minY, maxY };
-			for (Rectangle r : result) {
-				float[] limitDimensions = Rectangle.getMinMaxDimensions(r);
+			int i = 0;
+			for (Record<Rectangle> r : result) {
+				float[] limitDimensions = Rectangle.getMinMaxDimensions(r.getValue());
 				float newMinX = Benchmark.interpolatePoint(limitDimensions[0], initialXRange, xRange);
 				float newMaxX = Benchmark.interpolatePoint(limitDimensions[1], initialXRange, xRange);
 				float newMinY = Benchmark.interpolatePoint(limitDimensions[2], initialYRange, yRange);
 				float newMaxY = Benchmark.interpolatePoint(limitDimensions[3], initialYRange, yRange);
-				interpolatedResult.add(new Rectangle(newMinX, newMaxX, newMinY, newMaxY));
+				interpolatedResult.add(new Record<Rectangle>(new Rectangle(newMinX, newMaxX, newMinY, newMaxY),
+						Integer.toString(i++)));
 			}
 			return interpolatedResult.iterator();
 		}
@@ -41,16 +44,17 @@ public class RectangleDataMapper extends DataMapper<Rectangle> implements Serial
 	}
 
 	@Override
-	public Iterator<Rectangle> call(Iterator<String> dataIterator) throws Exception {
-		List<Rectangle> result = new ArrayList<Rectangle>();
+	public Iterator<Record<Rectangle>> call(Iterator<String> dataIterator) throws Exception {
+		List<Record<Rectangle>> result = new ArrayList<Record<Rectangle>>();
 		// getting expected points position in a row
 		int posMinX = pointPositionInLine[0], posMaxX = pointPositionInLine[1], posMinY = pointPositionInLine[2],
 				posMaxY = pointPositionInLine[3];
 		// getting range interpolators for Points
 		float[] xRange = rangeInterpolators.getFirst(), yRange = rangeInterpolators.getSecond();
 		// reading through file, recording min and max coordinate range
-		float i = 0, minRangeX = Float.MAX_VALUE, maxRangeX = -Float.MAX_VALUE, minRangeY = Float.MAX_VALUE,
+		float minRangeX = Float.MAX_VALUE, maxRangeX = -Float.MAX_VALUE, minRangeY = Float.MAX_VALUE,
 				maxRangeY = -Float.MAX_VALUE;
+		int i = 0;
 		while (dataIterator.hasNext()) {
 			String line = dataIterator.next();
 			// skipping header
@@ -66,8 +70,7 @@ public class RectangleDataMapper extends DataMapper<Rectangle> implements Serial
 			maxRangeX = Math.max(maxRangeX, maxX);
 			minRangeY = Math.min(minRangeY, minY);
 			maxRangeY = Math.max(maxRangeY, maxY);
-			result.add(new Rectangle(minX, maxX, minY, maxY));
-			++i;
+			result.add(new Record<Rectangle>(new Rectangle(minX, maxX, minY, maxY), Integer.toString(i++)));
 		}
 		// interpolating results if needed
 		return this.selectIterator(result, xRange, yRange, minRangeX, maxRangeX, minRangeY, maxRangeY);

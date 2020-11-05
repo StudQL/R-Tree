@@ -81,8 +81,7 @@ public class Main {
 			}
 		};
 		// create data points
-		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
-		Point[] points = Benchmark.generateRandomPoints(10000, new int[] { 0, 1000 }, new int[] { 100, 1000 });
+		Point[] points = Benchmark.generateRandomPoints(10000, new float[] { 0, 1000 }, new float[] { 100, 1000 });
 //		try {
 //			FileWriter f = new FileWriter("C:\\Users\\alzajac\\Downloads\\10_000_random.txt");
 //			for (Point p : points) {
@@ -93,7 +92,7 @@ public class Main {
 //			// TODO Auto-generated catch block
 //			e1.printStackTrace();
 //		}
-		List<Record<Point>> records = b.generateRecordsPoints(points);
+		List<Record<Point>> records = Benchmark.generateRecordsPoints(points);
 		for (Record<Point> r : records) {
 			tree.insert(r);
 		}
@@ -109,16 +108,16 @@ public class Main {
 	}
 
 	public static void test_multithread_knnSearch(int num_datapoints, int num_search_points, int divideFactor,
-			int[] xRange, int[] yRange, int k) throws InterruptedException {
+			float[] xRange, float[] yRange, int k) throws InterruptedException {
 		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
 		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
-		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
+		List<Record<Rectangle>> records = Benchmark.generateRecordsRectangle(rectangles);
 
 		// create search data points
 		Rectangle[] searchRectangles = Benchmark.generateRandomRectangles(num_search_points, xRange, yRange);
-		List<Record<Rectangle>> searchRecords = b.generateRecordsRectangle(searchRectangles);
+		List<Record<Rectangle>> searchRecords = Benchmark.generateRecordsRectangle(searchRectangles);
 
 		// init tree and Executor
 		RtreeMulti<Rectangle> tree = new RtreeMulti<Rectangle>();
@@ -163,12 +162,12 @@ public class Main {
 	}
 
 	public static void test_multithread_rangeSearch(int num_datapoints, int num_search_points, int divideFactor,
-			int[] xRange, int[] yRange) throws InterruptedException {
+			float[] xRange, float[] yRange) throws InterruptedException {
 		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
 		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
-		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
+		List<Record<Rectangle>> records = Benchmark.generateRecordsRectangle(rectangles);
 
 		// create search data points
 		List<Rectangle> searchRectangles = Arrays
@@ -217,16 +216,16 @@ public class Main {
 	}
 
 	public static void test_multithread_search(int num_datapoints, int num_search_points, int divideFactor,
-			int[] xRange, int[] yRange) throws InterruptedException {
+			float[] xRange, float[] yRange) throws InterruptedException {
 		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
 		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
-		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
+		List<Record<Rectangle>> records = Benchmark.generateRecordsRectangle(rectangles);
 
 		// create search data points
 		Rectangle[] searchRectangles = Benchmark.generateRandomRectangles(num_search_points, xRange, yRange);
-		List<Record<Rectangle>> searchRecords = b.generateRecordsRectangle(searchRectangles);
+		List<Record<Rectangle>> searchRecords = Benchmark.generateRecordsRectangle(searchRectangles);
 
 		// init tree and Executor
 		RtreeMulti<Rectangle> tree = new RtreeMulti<Rectangle>();
@@ -270,13 +269,13 @@ public class Main {
 		System.out.printf("time multi-thread: %d ms\n\n", end - start);
 	}
 
-	public static void test_multithread_delete(int num_datapoints, int divideFactor, int[] xRange, int[] yRange)
+	public static void test_multithread_delete(int num_datapoints, int divideFactor, float[] xRange, float[] yRange)
 			throws InterruptedException {
 		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
 		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
-		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
+		List<Record<Rectangle>> records = Benchmark.generateRecordsRectangle(rectangles);
 
 		// init tree and Executor
 		RtreeMulti<Rectangle> tree = new RtreeMulti<Rectangle>();
@@ -320,13 +319,13 @@ public class Main {
 		System.out.printf("time multi-thread: %d ms\n\n", end - start);
 	}
 
-	public static void test_multithread_insert(int num_datapoints, int divideFactor, int[] xRange, int[] yRange)
+	public static void test_multithread_insert(int num_datapoints, int divideFactor, float[] xRange, float[] yRange)
 			throws InterruptedException {
 		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
 		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
-		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
+		List<Record<Rectangle>> records = Benchmark.generateRecordsRectangle(rectangles);
 
 		// init tree and Executor
 		RtreeMulti<Rectangle> tree = new RtreeMulti<Rectangle>();
@@ -355,12 +354,12 @@ public class Main {
 		System.out.printf("time multi-thread: %d ms\n\n", end - start);
 	}
 
-	public static void test_single_insert(int num_datapoints, int[] xRange, int[] yRange) {
+	public static void test_single_insert(int num_datapoints, float[] xRange, float[] yRange) {
 		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
 		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
-		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
+		List<Record<Rectangle>> records = Benchmark.generateRecordsRectangle(rectangles);
 
 		// init tree and Executor
 		Rtree<Rectangle> tree = new Rtree<Rectangle>();
@@ -373,12 +372,12 @@ public class Main {
 		System.out.printf("time single-thread: %d ms\n\n", end - start);
 	}
 
-	public static void test_single_delete(int num_datapoints, int[] xRange, int[] yRange) {
+	public static void test_single_delete(int num_datapoints, float[] xRange, float[] yRange) {
 		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
 		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
-		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
+		List<Record<Rectangle>> records = Benchmark.generateRecordsRectangle(rectangles);
 
 		// init tree and Executor
 		Rtree<Rectangle> tree = new Rtree<Rectangle>();
@@ -392,17 +391,17 @@ public class Main {
 		System.out.printf("time single-thread: %d ms\n\n", end - start);
 	}
 
-	public static void test_single_search(int num_datapoints, int num_search_points, int divideFactor, int[] xRange,
-			int[] yRange) {
+	public static void test_single_search(int num_datapoints, int num_search_points, int divideFactor, float[] xRange,
+			float[] yRange) {
 		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
 		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
-		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
+		List<Record<Rectangle>> records = Benchmark.generateRecordsRectangle(rectangles);
 
 		// create search data points
 		Rectangle[] searchRectangles = Benchmark.generateRandomRectangles(num_search_points, xRange, yRange);
-		List<Record<Rectangle>> searchRecords = b.generateRecordsRectangle(searchRectangles);
+		List<Record<Rectangle>> searchRecords = Benchmark.generateRecordsRectangle(searchRectangles);
 
 		// init tree and Executor
 		Rtree<Rectangle> tree = new Rtree<Rectangle>();
@@ -424,12 +423,12 @@ public class Main {
 	}
 
 	public static void test_single_rangeSearch(int num_datapoints, int num_search_points, int divideFactor,
-			int[] xRange, int[] yRange) {
+			float[] xRange, float[] yRange) {
 		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
 		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
-		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
+		List<Record<Rectangle>> records = Benchmark.generateRecordsRectangle(rectangles);
 
 		// create search data points
 		List<Rectangle> searchRectangles = Arrays
@@ -453,17 +452,17 @@ public class Main {
 		System.out.printf("time single-thread: %d ms\n\n", end - start);
 	}
 
-	public static void test_single_knnSearch(int num_datapoints, int num_search_points, int divideFactor, int[] xRange,
-			int[] yRange, int k) {
+	public static void test_single_knnSearch(int num_datapoints, int num_search_points, int divideFactor,
+			float[] xRange, float[] yRange, int k) {
 		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
 		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
-		List<Record<Rectangle>> records = b.generateRecordsRectangle(rectangles);
+		List<Record<Rectangle>> records = Benchmark.generateRecordsRectangle(rectangles);
 
 		// create search data points
 		Rectangle[] searchRectangles = Benchmark.generateRandomRectangles(num_search_points, xRange, yRange);
-		List<Record<Rectangle>> searchRecords = b.generateRecordsRectangle(searchRectangles);
+		List<Record<Rectangle>> searchRecords = Benchmark.generateRecordsRectangle(searchRectangles);
 
 		// init tree and Executor
 		Rtree<Rectangle> tree = new Rtree<Rectangle>();
@@ -487,8 +486,8 @@ public class Main {
 	public static void completeSingleBenchmark() {
 		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 		int n = 10000;
-		int[] xRange = new int[] { 0, 400 };
-		int[] yRange = new int[] { 0, 600 };
+		float[] xRange = new float[] { 0, 400 };
+		float[] yRange = new float[] { 0, 600 };
 		int[] page_sizes = new int[] { 6, 12, 25, 50, 102 };
 		List<Function<Integer, Integer>> min_page_operators = Arrays.asList(num -> Math.round(num) / 3,
 				num -> Math.round(num) / 2, num -> 2);
@@ -504,8 +503,8 @@ public class Main {
 		int n_search = 100000;
 		int divideFactor = 10000;
 		int k = 3;
-		int[] xRange = new int[] { 0, 500 };
-		int[] yRange = new int[] { -100, 600 };
+		float[] xRange = new float[] { 0, 500 };
+		float[] yRange = new float[] { -100, 600 };
 		test_single_insert(n, xRange, yRange);
 		try {
 			test_multithread_insert(n, divideFactor, xRange, yRange);

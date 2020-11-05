@@ -8,6 +8,7 @@ import java.util.List;
 import com.studql.shape.Point;
 import com.studql.utils.Benchmark;
 import com.studql.utils.Pair;
+import com.studql.utils.Record;
 
 public class PointDataMapper extends DataMapper<Point> implements Serializable {
 
@@ -21,17 +22,19 @@ public class PointDataMapper extends DataMapper<Point> implements Serializable {
 		this.hasHeader = hasHeader;
 	}
 
-	private Iterator<Point> selectIterator(List<Point> result, float[] xRange, float[] yRange, float minX, float maxX,
-			float minY, float maxY) {
+	private Iterator<Record<Point>> selectIterator(List<Record<Point>> result, float[] xRange, float[] yRange,
+			float minX, float maxX, float minY, float maxY) {
 		if (xRange != null && yRange != null) {
-			List<Point> interpolatedResult = new ArrayList<Point>();
+			List<Record<Point>> interpolatedResult = new ArrayList<Record<Point>>();
 			float[] initialXRange = new float[] { minX, maxX };
 			float[] initialYRange = new float[] { minY, maxY };
-			for (Point p : result) {
-				float x = p.getX(), y = p.getY();
+			int i = 0;
+			for (Record<Point> p : result) {
+				float x = p.getValue().getX(), y = p.getValue().getY();
 				float interpolatedX = Benchmark.interpolatePoint(x, initialXRange, xRange);
 				float interpolatedY = Benchmark.interpolatePoint(y, initialYRange, yRange);
-				interpolatedResult.add(new Point(interpolatedX, interpolatedY));
+				interpolatedResult
+						.add(new Record<Point>(new Point(interpolatedX, interpolatedY), Integer.toString(i++)));
 			}
 			return interpolatedResult.iterator();
 		}
@@ -39,14 +42,15 @@ public class PointDataMapper extends DataMapper<Point> implements Serializable {
 	}
 
 	@Override
-	public Iterator<Point> call(Iterator<String> dataIterator) throws Exception {
-		List<Point> result = new ArrayList<Point>();
+	public Iterator<Record<Point>> call(Iterator<String> dataIterator) throws Exception {
+		List<Record<Point>> result = new ArrayList<Record<Point>>();
 		// getting expected points position in a row
 		int posX = pointPositionInLine[0], posY = pointPositionInLine[1];
 		// getting range interpolators for Points
 		float[] xRange = rangeInterpolators.getFirst(), yRange = rangeInterpolators.getSecond();
 		// reading through file, recording min and max coordinate range
-		float i = 0, minX = Float.MAX_VALUE, maxX = -Float.MAX_VALUE, minY = Float.MAX_VALUE, maxY = -Float.MAX_VALUE;
+		float minX = Float.MAX_VALUE, maxX = -Float.MAX_VALUE, minY = Float.MAX_VALUE, maxY = -Float.MAX_VALUE;
+		int i = 0;
 		while (dataIterator.hasNext()) {
 			String line = dataIterator.next();
 			// skipping header
@@ -61,8 +65,7 @@ public class PointDataMapper extends DataMapper<Point> implements Serializable {
 			maxX = Math.max(maxX, x);
 			minY = Math.min(minY, y);
 			maxY = Math.max(maxY, y);
-			result.add(new Point(x, y));
-			++i;
+			result.add(new Record<Point>(new Point(x, y), Integer.toString(i++)));
 		}
 		// interpolating results if needed
 		return this.selectIterator(result, xRange, yRange, minX, maxX, minY, maxY);
