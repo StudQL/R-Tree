@@ -16,6 +16,5 @@ public abstract class DataMapper<T extends Boundable> implements FlatMapFunction
 	protected Pair<float[], float[]> rangeInterpolators;
 	protected boolean hasHeader;
 
-	@Override
 	public abstract Iterator<Record<T>> call(Iterator<String> t) throws Exception;
 }
