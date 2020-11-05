@@ -1,5 +1,6 @@
 package com.studql.utils;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -23,6 +24,7 @@ public class Visualizer<T extends Boundable> {
 	private static final int OVERLAP_TRANSPARENCY = 20;
 	// bright pink
 	private static final Color RECORD_COLOR = new Color(254, 2, 164);
+	private static final Color GRID_COLOR = new Color(2, 164, 254);
 
 	public Visualizer() {
 		this.image_size = 1000;
@@ -70,9 +72,8 @@ public class Visualizer<T extends Boundable> {
 		return new int[] { boundedX, boundedY, boundedWidth, boundedHeight };
 	}
 
-	private void drawRecordNode(Graphics2D g, Node<T> node, float[] rootMbrWidthRange, float[] rootMbrHeightRange) {
-		g.setPaint(RECORD_COLOR);
-		T recordValue = node.getRecord().getValue();
+	private void drawRecord(Graphics2D g, Record<T> record, float[] rootMbrWidthRange, float[] rootMbrHeightRange) {
+		T recordValue = record.getValue();
 		Rectangle mbr = recordValue.getMbr();
 		int[] drawingDimensions = this.getDrawingDimensions(mbr, rootMbrWidthRange, rootMbrHeightRange);
 		// drawing a small square for point
@@ -82,6 +83,11 @@ public class Visualizer<T extends Boundable> {
 		else
 			g.draw(recordValue.draw(drawingDimensions[0], drawingDimensions[1], drawingDimensions[2],
 					drawingDimensions[3]));
+	}
+
+	private void drawRecordNode(Graphics2D g, Node<T> node, float[] rootMbrWidthRange, float[] rootMbrHeightRange) {
+		g.setPaint(RECORD_COLOR);
+		this.drawRecord(g, node.getRecord(), rootMbrWidthRange, rootMbrHeightRange);
 	}
 
 	private void drawInternalNode(Graphics2D g, Node<T> node, float[] rootMbrWidthRange, float[] rootMbrHeightRange,
@@ -148,6 +154,33 @@ public class Visualizer<T extends Boundable> {
 		this.drawNodes(tree.getRoot(), graphics2D, rootMbrWidthRange, rootMbrHeightRange, treeHeight);
 		graphics2D.dispose();
 
+		ImageIO.write(image, "png", filelocation);
+	}
+
+	public void createGridVisualization(List<Record<T>> records, List<Rectangle> grids, Rectangle treeBoundary,
+			File filelocation) throws IOException {
+		final BufferedImage image = new BufferedImage(this.image_size, this.image_size, BufferedImage.TYPE_INT_ARGB);
+		final Graphics2D graphics2D = image.createGraphics();
+		graphics2D.setPaint(Color.WHITE);
+		graphics2D.fillRect(0, 0, this.image_size, this.image_size);
+		// getting root's mbr limit dimensions
+		float[] rootMbrWidthRange = new float[] { treeBoundary.getTopLeft().getX(), treeBoundary.getTopRight().getX() };
+		float[] rootMbrHeightRange = new float[] { treeBoundary.getBottomLeft().getY(),
+				treeBoundary.getTopLeft().getY() };
+		// draw records
+		graphics2D.setPaint(RECORD_COLOR);
+		for (Record<T> record : records) {
+			this.drawRecord(graphics2D, record, rootMbrWidthRange, rootMbrHeightRange);
+		}
+		// draw grids
+		graphics2D.setPaint(GRID_COLOR);
+		graphics2D.setStroke(new BasicStroke(5));
+		for (Rectangle grid : grids) {
+			int[] drawingDimensions = this.getDrawingDimensions(grid, rootMbrWidthRange, rootMbrHeightRange);
+			graphics2D.draw(
+					grid.draw(drawingDimensions[0], drawingDimensions[1], drawingDimensions[2], drawingDimensions[3]));
+		}
+		graphics2D.dispose();
 		ImageIO.write(image, "png", filelocation);
 	}
 }

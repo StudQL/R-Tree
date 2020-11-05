@@ -81,9 +81,9 @@ public class Main {
 			}
 		};
 		// create data points
-		Point[] points = Benchmark.generateRandomPoints(10000, new float[] { 0, 1000 }, new float[] { 100, 1000 });
+		Point[] points = Benchmark.generateRandomPoints(10000000, new float[] { 0, 1000 }, new float[] { 100, 1000 });
 //		try {
-//			FileWriter f = new FileWriter("C:\\Users\\alzajac\\Downloads\\10_000_random.txt");
+//			FileWriter f = new FileWriter("C:\\Users\\alzajac\\Downloads\\100_000_000_random.txt");
 //			for (Point p : points) {
 //				f.write(p.getX() + " " + p.getY() + "\n");
 //			}

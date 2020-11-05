@@ -34,24 +34,32 @@ public class Benchmark {
 		return (value / (valueRange[1] - valueRange[0])) * (referenceRange[1] - referenceRange[0]);
 	}
 
+	public static Point generateRandomPoint(float[] xRange, float[] yRange) {
+		int x = getRandomInRange(xRange[0], xRange[1]);
+		int y = getRandomInRange(yRange[0], yRange[1]);
+		return new Point(x, y);
+	}
+
 	public static Point[] generateRandomPoints(int n, float[] xRange, float[] yRange) {
 		Point[] dataPoints = new Point[n];
 		for (int i = 0; i < n; ++i) {
-			int x = getRandomInRange(xRange[0], xRange[1]);
-			int y = getRandomInRange(yRange[0], yRange[1]);
-			dataPoints[i] = new Point(x, y);
+			dataPoints[i] = generateRandomPoint(xRange, yRange);
 		}
 		return dataPoints;
+	}
+
+	public static Rectangle generateRandomRectangle(float[] xRange, float[] yRange) {
+		int xBottomRight = getRandomInRange(xRange[0], xRange[1]);
+		int yBottomRight = getRandomInRange(yRange[0], yRange[1]);
+		int xTopLeft = getRandomInRange(xRange[0], xBottomRight);
+		int yTopLeft = getRandomInRange(yBottomRight, yRange[1]);
+		return new Rectangle(new Point(xTopLeft, yTopLeft), new Point(xBottomRight, yBottomRight));
 	}
 
 	public static Rectangle[] generateRandomRectangles(int n, float[] xRange, float[] yRange) {
 		Rectangle[] dataPoints = new Rectangle[n];
 		for (int i = 0; i < n; ++i) {
-			int xBottomRight = getRandomInRange(xRange[0], xRange[1]);
-			int yBottomRight = getRandomInRange(yRange[0], yRange[1]);
-			int xTopLeft = getRandomInRange(xRange[0], xBottomRight);
-			int yTopLeft = getRandomInRange(yBottomRight, yRange[1]);
-			dataPoints[i] = new Rectangle(new Point(xTopLeft, yTopLeft), new Point(xBottomRight, yBottomRight));
+			dataPoints[i] = generateRandomRectangle(xRange, yRange);
 		}
 		return dataPoints;
 	}
