@@ -46,35 +46,48 @@ public class ShapeRDD<T extends Boundable> implements Serializable {
 	public ShapeRDD(JavaSparkContext sc, String inputLocation, DataMapper<T> dataMapper, int min_num_records,
 			int max_num_records, NodeSplitter<T> splitter, int num_partitions) {
 		this.initialRDD = createInitialRDD(sc, inputLocation, dataMapper, num_partitions);
+		this.initialRDD.persist(StorageLevel.DISK_ONLY());
 		this.indexedInitialRDD = createIndexedInitialRDD(min_num_records, max_num_records, splitter);
+		this.indexedInitialRDD.persist(StorageLevel.DISK_ONLY());
 		this.spatialRDD = createPartitionedRDD(splitter);
+		this.spatialRDD.persist(StorageLevel.DISK_ONLY());
 		this.indexedSpatialRDD = createIndexedPartitionedRDD(min_num_records, max_num_records, splitter);
-		this.initialRDD.persist(StorageLevel.MEMORY_ONLY());
-		this.indexedInitialRDD.persist(StorageLevel.MEMORY_ONLY());
-		this.spatialRDD.persist(StorageLevel.MEMORY_ONLY());
-		this.indexedSpatialRDD.persist(StorageLevel.MEMORY_ONLY());
-//		this.visualizeGrids();
+		this.indexedSpatialRDD.persist(StorageLevel.DISK_ONLY());
+//		this.visualizeGrids(partitionGrids);
 	}
 
-	private JavaRDD<Record<T>> createInitialRDD(JavaSparkContext sc, String inputLocation,
-			DataMapper<T> pointDataMapper, int num_partitions) {
+	private JavaRDD<Record<T>> createInitialRDD(JavaSparkContext sc, String inputLocation, DataMapper<T> dataMapper,
+			int num_partitions) {
 		JavaRDD<String> dataLines = sc.textFile(inputLocation, num_partitions);
 		// loading RDD with respect to input data
-		return dataLines.mapPartitions(pointDataMapper);
+		return dataLines.mapPartitions(dataMapper);
 	}
 
 	private JavaRDD<Rtree<T>> createIndexedInitialRDD(int min_num_records, int max_num_records,
 			NodeSplitter<T> splitter) {
 		// building one rtree for each partition
 		RtreeIndexBuilder<T> indexBuilder = new RtreeIndexBuilder<T>(min_num_records, max_num_records, splitter);
-		return this.initialRDD.mapPartitions(indexBuilder);
+		JavaRDD<Rtree<T>> res = this.initialRDD.mapPartitions(indexBuilder);
+		return res;
 	}
 
 	private JavaRDD<Rtree<T>> createIndexedPartitionedRDD(int min_num_records, int max_num_records,
 			NodeSplitter<T> splitter) {
 		RtreeIndexBuilder<T> indexBuilder = new RtreeIndexBuilder<T>(min_num_records, max_num_records, splitter);
 		// building one rtree for each partition
-		return this.spatialRDD.mapPartitions(indexBuilder);
+		JavaRDD<Rtree<T>> res = this.spatialRDD.mapPartitions(indexBuilder);
+//		int i = 0;
+//		for (Rtree<T> tree : res.collect()) {
+//			try {
+//				new Visualizer<T>().createVisualization(tree,
+//						new File("C:\\Users\\alzajac\\Downloads\\test" + i + ".png"));
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			i++;
+//		}
+		return res;
 	}
 
 	private JavaRDD<Record<T>> createPartitionedRDD(NodeSplitter<T> splitter) {
@@ -86,7 +99,7 @@ public class ShapeRDD<T extends Boundable> implements Serializable {
 		List<Record<T>> sampledRecords = this.initialRDD.sample(false, sample_fraction).collect();
 		// partition with Rtree index
 		int numPartitions = this.initialRDD.rdd().partitions().length;
-		Function<Integer, Integer> computeMinRecords = num -> num;
+		Function<Integer, Integer> computeMinRecords = num -> num / 2;
 		SpatialPartitioner<T> partitioner = new SpatialPartitioner<T>(sampledRecords, numPartitions, splitter,
 				computeMinRecords);
 		// repartition the RDD by spatial grids
@@ -146,10 +159,10 @@ public class ShapeRDD<T extends Boundable> implements Serializable {
 		this.numRecords = limits.getRecordCount();
 	}
 
-	private void visualizeGrids() {
+	private void visualizeGrids(List<Rectangle> rectangles) {
 		Visualizer<T> v = new Visualizer<T>();
 		try {
-			v.createGridVisualization(initialRDD.collect(), partitionGrids, datasetMbr,
+			v.createGridVisualization(initialRDD.collect(), rectangles, datasetMbr,
 					new File("C:\\Users\\alzajac\\Downloads\\test.png"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
