@@ -45,7 +45,6 @@ public class LinearSplitter<T extends Boundable> extends NodeSplitter<T> {
 		}
 		NewNodes = new Pair<Node<T>, Node<T>>(EL, EH);
 
-		// System.out.println(EH.getMbr().toString() + highest);
 		return NewNodes;
 	}
 

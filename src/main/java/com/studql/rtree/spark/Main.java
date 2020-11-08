@@ -26,15 +26,15 @@ public class Main {
 			Record<Point> searchRecord = new Record<Point>(Benchmark.generateRandomPoint(xRange, yRange), "1");
 			JavaRDD<Record<Point>> matchingRecords = dataset.exactQuery(searchRecord, withIndex, withInitialData);
 			for (Record<Point> matchingRecord : matchingRecords.collect()) {
-//				System.out.println(matchingRecord);
+				System.out.println(matchingRecord);
 			}
 
-//			try {
-//				Thread.sleep(msDelay);
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+			try {
+				Thread.sleep(msDelay);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
 		}
 	}
@@ -53,7 +53,9 @@ public class Main {
 				float[] selectiveYRange = new float[] { (float) (yMin * selectivity), (float) (yMax * selectivity) };
 				Rectangle rangeRectangle = Benchmark.generateRandomRectangle(selectiveXRange, selectiveYRange);
 				JavaRDD<Record<Point>> matchingRecords = dataset.rangeQuery(rangeRectangle, withIndex, withInitialData);
-				matchingRecords.count();
+				for (Record<Point> matchingRecord : matchingRecords.collect()) {
+					System.out.println(matchingRecord);
+				}
 				try {
 					Thread.sleep(msDelay);
 				} catch (InterruptedException e) {
@@ -76,7 +78,7 @@ public class Main {
 			for (int k : knnValues) {
 				List<Pair<Record<Point>, Float>> result = dataset.knnQuery(centerRecord, k, withIndex, withInitialData);
 				for (Pair<Record<Point>, Float> r : result) {
-//					System.out.println(r.toString());
+					System.out.println(r.toString());
 				}
 				try {
 					Thread.sleep(msDelay);
@@ -94,7 +96,7 @@ public class Main {
 		SparkConf conf = new SparkConf().setAppName("SparkRtreeProcessing").setMaster("local[*]");
 		JavaSparkContext sc = new JavaSparkContext(conf);
 
-		String fileLocation = "hdfs://localhost:9000/test/10_000_range.txt";
+		String fileLocation = "hdfs://localhost:9000/test/1_000_000_range.txt";
 		// creating dataset properties
 		String delimiter = " ";
 		int[] coordinatesPositions = new int[] { 0, 1 };
