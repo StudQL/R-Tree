@@ -1,6 +1,7 @@
 package com.studql.rtree;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -81,30 +82,32 @@ public class Main {
 			}
 		};
 		// create data points
-		Point[] points = Benchmark.generateRandomPoints(10000000, new float[] { 0, 1000 }, new float[] { 100, 1000 });
-//		try {
-//			FileWriter f = new FileWriter("C:\\Users\\alzajac\\Downloads\\100_000_000_random.txt");
-//			for (Point p : points) {
-//				f.write(p.getX() + " " + p.getY() + "\n");
-//			}
-//			f.close();
-//		} catch (IOException e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
-		List<Record<Point>> records = Benchmark.generateRecordsPoints(points);
-		for (Record<Point> r : records) {
-			tree.insert(r);
-		}
-		System.out.println(tree.toString());
-
-		Visualizer<Point> v = new Visualizer<Point>();
+		int n = 10000000;
+		Point[] points = Benchmark.generateRandomPoints(n, new float[] { 0, n }, new float[] { 0, n });
 		try {
-			v.createVisualization(tree, new File("C:\\Users\\alzajac\\Downloads\\test.png"));
-		} catch (IOException e) {
+			FileWriter f = new FileWriter("C:\\Users\\alzajac\\Downloads\\10_000_000_range.txt");
+			for (Point p : points) {
+				f.write(p.getX() + " " + p.getY() + "\n");
+			}
+			f.close();
+		} catch (IOException e1) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			e1.printStackTrace();
 		}
+//		List<Record<Point>> records = Benchmark.generateRecordsPoints(points);
+//		for (Record<Point> r : records) {
+//			tree.insert(r);
+//		}
+//		System.out.println(tree.toString());
+//
+//		Visualizer<Point> v = new Visualizer<Point>();
+//		try {
+//			v.createVisualization(tree, new File("C:\\Users\\alzajac\\Downloads\\test.png"));
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//	}
+
 	}
 
 	public static void test_multithread_knnSearch(int num_datapoints, int num_search_points, int divideFactor,
@@ -484,34 +487,35 @@ public class Main {
 	}
 
 	public static void completeSingleBenchmark() {
-		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
-		int n = 10000;
-		float[] xRange = new float[] { 0, 400 };
-		float[] yRange = new float[] { 0, 600 };
-		int[] page_sizes = new int[] { 6, 12, 25, 50, 102 };
+		Benchmark b = new Benchmark("C:\\Users\\alzajac\\Downloads\\test.png");
+		int n = 1000;
+		float[] xRange = new float[] { 0, 1000 };
+		float[] yRange = new float[] { 0, 1000 };
+		int[] page_sizes = new int[] { 6, 12, 25, 50, 102, 256, 512 };
 		List<Function<Integer, Integer>> min_page_operators = Arrays.asList(num -> Math.round(num) / 3,
 				num -> Math.round(num) / 2, num -> 2);
 		boolean shouldVisualize = true;
 		String fileLocation = "C:\\Users\\alzajac\\Downloads\\1000.txt";
-		b.benchmarkInsertWithRandomRectangles(n, xRange, yRange, page_sizes, min_page_operators, shouldVisualize);
-		b.benchmarkInsertWithDatasetPoints(fileLocation, page_sizes, min_page_operators, shouldVisualize);
+		b.benchmarkInsertWithRandomPoints(n, xRange, yRange, page_sizes, min_page_operators, shouldVisualize);
+//		b.benchmarkInsertWithDatasetPoints(fileLocation, page_sizes, min_page_operators, shouldVisualize);
 	}
 
 	public static void main(String[] args) {
 		test_points();
-		int n = 100;
-		int n_search = 100000;
-		int divideFactor = 10000;
-		int k = 3;
-		float[] xRange = new float[] { 0, 500 };
-		float[] yRange = new float[] { -100, 600 };
-		test_single_insert(n, xRange, yRange);
-		try {
-			test_multithread_insert(n, divideFactor, xRange, yRange);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		int n = 100;
+//		int n_search = 1000;
+//		int divideFactor = 10000;
+//		int k = 3;
+//		float[] xRange = new float[] { 0, 500 };
+//		float[] yRange = new float[] { -100, 600 };
+//		test_single_insert(n, xRange, yRange);
+//		try {
+//			test_multithread_insert(n, divideFactor, xRange, yRange);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		completeSingleBenchmark();
 	}
 
 }
