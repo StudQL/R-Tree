@@ -501,20 +501,19 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
-		test_points();
-//		int n = 100;
-//		int n_search = 1000;
-//		int divideFactor = 10000;
-//		int k = 3;
-//		float[] xRange = new float[] { 0, 500 };
-//		float[] yRange = new float[] { -100, 600 };
-//		test_single_insert(n, xRange, yRange);
-//		try {
-//			test_multithread_insert(n, divideFactor, xRange, yRange);
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		int n = 100;
+		int n_search = 1000;
+		int divideFactor = 10000;
+		int k = 3;
+		float[] xRange = new float[] { 0, 500 };
+		float[] yRange = new float[] { -100, 600 };
+		test_single_insert(n, xRange, yRange);
+		try {
+			test_multithread_insert(n, divideFactor, xRange, yRange);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 //		completeSingleBenchmark();
 	}
 
