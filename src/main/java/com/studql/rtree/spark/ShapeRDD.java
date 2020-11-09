@@ -53,7 +53,7 @@ public class ShapeRDD<T extends Boundable> implements Serializable {
 		this.spatialRDD.persist(StorageLevel.DISK_ONLY());
 		this.indexedSpatialRDD = createIndexedPartitionedRDD(min_num_records, max_num_records, splitter);
 		this.indexedSpatialRDD.persist(StorageLevel.DISK_ONLY());
-//		this.visualizeGrids(partitionGrids);
+		this.visualizeGrids(partitionGrids);
 	}
 
 	private JavaRDD<Record<T>> createInitialRDD(JavaSparkContext sc, String inputLocation, DataMapper<T> dataMapper,

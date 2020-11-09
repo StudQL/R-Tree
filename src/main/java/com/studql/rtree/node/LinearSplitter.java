@@ -8,6 +8,7 @@ import com.studql.utils.Pair;
 
 public class LinearSplitter<T extends Boundable> extends NodeSplitter<T> {
 
+	private static final long serialVersionUID = 1922358360044261073L;
 	private int min_num_records;
 
 	public LinearSplitter(int min_num_records) {

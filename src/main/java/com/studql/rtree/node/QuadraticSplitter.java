@@ -8,6 +8,7 @@ import com.studql.utils.Pair;
 
 public class QuadraticSplitter<T extends Boundable> extends NodeSplitter<T> {
 
+	private static final long serialVersionUID = 4904198287162160756L;
 	private int min_num_records;
 
 	public QuadraticSplitter(int min_num_records) {

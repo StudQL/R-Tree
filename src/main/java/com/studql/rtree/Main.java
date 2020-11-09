@@ -1,7 +1,6 @@
 package com.studql.rtree;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,55 +63,27 @@ public class Main {
 		int max_records = 4;
 		Rtree<Point> tree = new Rtree<Point>(min_records, max_records, new QuadraticSplitter<Point>(min_records));
 
-		@SuppressWarnings("serial")
-		ArrayList<Record<Point>> dataPoints = new ArrayList<Record<Point>>() {
-			{
-				add(new Record<Point>(new Point(1, 2), "1"));
-				add(new Record<Point>(new Point(3, 4), "2"));
-				add(new Record<Point>(new Point(5, 2), "3"));
-				add(new Record<Point>(new Point(6, 3), "4"));
-				add(new Record<Point>(new Point(7, 5), "5"));
-				add(new Record<Point>(new Point(8, 4), "6"));
-				add(new Record<Point>(new Point(9, 2), "7"));
-				add(new Record<Point>(new Point(10, 5), "8"));
-				add(new Record<Point>(new Point(11, 3), "9"));
-				add(new Record<Point>(new Point(12, 1), "10"));
-				add(new Record<Point>(new Point(13, 2), "11"));
-				add(new Record<Point>(new Point(4, 3), "12"));
-			}
-		};
 		// create data points
 		int n = 10000000;
 		Point[] points = Benchmark.generateRandomPoints(n, new float[] { 0, n }, new float[] { 0, n });
-		try {
-			FileWriter f = new FileWriter("C:\\Users\\alzajac\\Downloads\\10_000_000_range.txt");
-			for (Point p : points) {
-				f.write(p.getX() + " " + p.getY() + "\n");
-			}
-			f.close();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		List<Record<Point>> records = Benchmark.generateRecordsPoints(points);
+		for (Record<Point> r : records) {
+			tree.insert(r);
 		}
-//		List<Record<Point>> records = Benchmark.generateRecordsPoints(points);
-//		for (Record<Point> r : records) {
-//			tree.insert(r);
-//		}
-//		System.out.println(tree.toString());
-//
-//		Visualizer<Point> v = new Visualizer<Point>();
-//		try {
-//			v.createVisualization(tree, new File("C:\\Users\\alzajac\\Downloads\\test.png"));
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//	}
+		System.out.println(tree.toString());
+
+		Visualizer<Point> v = new Visualizer<Point>();
+		try {
+			v.createVisualization(tree, new File("C:\\Users\\alzajac\\Downloads\\test.png"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 
 	public static void test_multithread_knnSearch(int num_datapoints, int num_search_points, int divideFactor,
 			float[] xRange, float[] yRange, int k) throws InterruptedException {
-		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
 		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
@@ -148,10 +119,8 @@ public class Main {
 
 		// get results
 		for (Future<List<List<Pair<Record<Rectangle>, Float>>>> result : results) {
-			List<List<Pair<Record<Rectangle>, Float>>> v = null;
 			try {
-				v = result.get();
-//				System.out.println("Search operations: " + v);
+				result.get();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (ExecutionException e) {
@@ -166,7 +135,6 @@ public class Main {
 
 	public static void test_multithread_rangeSearch(int num_datapoints, int num_search_points, int divideFactor,
 			float[] xRange, float[] yRange) throws InterruptedException {
-		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
 		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
@@ -202,10 +170,8 @@ public class Main {
 
 		// get results
 		for (Future<List<List<Record<Rectangle>>>> result : results) {
-			List<List<Record<Rectangle>>> v = null;
 			try {
-				v = result.get();
-//				System.out.println("Search operations: " + v);
+				result.get();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (ExecutionException e) {
@@ -220,8 +186,6 @@ public class Main {
 
 	public static void test_multithread_search(int num_datapoints, int num_search_points, int divideFactor,
 			float[] xRange, float[] yRange) throws InterruptedException {
-		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
-
 		// create data points
 		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
 		List<Record<Rectangle>> records = Benchmark.generateRecordsRectangle(rectangles);
@@ -256,10 +220,8 @@ public class Main {
 
 		// get results
 		for (Future<List<Record<Rectangle>>> result : results) {
-			List<Record<Rectangle>> v = null;
 			try {
-				v = result.get();
-//				System.out.println("Search operations: " + v);
+				result.get();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (ExecutionException e) {
@@ -274,7 +236,7 @@ public class Main {
 
 	public static void test_multithread_delete(int num_datapoints, int divideFactor, float[] xRange, float[] yRange)
 			throws InterruptedException {
-		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
+		;
 
 		// create data points
 		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
@@ -306,10 +268,8 @@ public class Main {
 
 		// get results
 		for (Future<List<Boolean>> result : results) {
-			List<Boolean> v = null;
 			try {
-				v = result.get();
-//				System.out.println("Delete operations: " + v);
+				result.get();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (ExecutionException e) {
@@ -324,7 +284,6 @@ public class Main {
 
 	public static void test_multithread_insert(int num_datapoints, int divideFactor, float[] xRange, float[] yRange)
 			throws InterruptedException {
-		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
 		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
@@ -358,7 +317,6 @@ public class Main {
 	}
 
 	public static void test_single_insert(int num_datapoints, float[] xRange, float[] yRange) {
-		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
 		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
@@ -376,7 +334,7 @@ public class Main {
 	}
 
 	public static void test_single_delete(int num_datapoints, float[] xRange, float[] yRange) {
-		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
+		new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
 		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
@@ -396,7 +354,6 @@ public class Main {
 
 	public static void test_single_search(int num_datapoints, int num_search_points, int divideFactor, float[] xRange,
 			float[] yRange) {
-		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
 		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
@@ -427,7 +384,6 @@ public class Main {
 
 	public static void test_single_rangeSearch(int num_datapoints, int num_search_points, int divideFactor,
 			float[] xRange, float[] yRange) {
-		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
 		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
@@ -457,7 +413,6 @@ public class Main {
 
 	public static void test_single_knnSearch(int num_datapoints, int num_search_points, int divideFactor,
 			float[] xRange, float[] yRange, int k) {
-		Benchmark b = new Benchmark("D:\\Users\\utilisateur\\Downloads\\test.png");
 
 		// create data points
 		Rectangle[] rectangles = Benchmark.generateRandomRectangles(num_datapoints, xRange, yRange);
@@ -495,16 +450,13 @@ public class Main {
 		List<Function<Integer, Integer>> min_page_operators = Arrays.asList(num -> Math.round(num) / 3,
 				num -> Math.round(num) / 2, num -> 2);
 		boolean shouldVisualize = true;
-		String fileLocation = "C:\\Users\\alzajac\\Downloads\\1000.txt";
 		b.benchmarkInsertWithRandomPoints(n, xRange, yRange, page_sizes, min_page_operators, shouldVisualize);
 //		b.benchmarkInsertWithDatasetPoints(fileLocation, page_sizes, min_page_operators, shouldVisualize);
 	}
 
 	public static void main(String[] args) {
 		int n = 100;
-		int n_search = 1000;
 		int divideFactor = 10000;
-		int k = 3;
 		float[] xRange = new float[] { 0, 500 };
 		float[] yRange = new float[] { -100, 600 };
 		test_single_insert(n, xRange, yRange);

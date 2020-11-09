@@ -119,7 +119,7 @@ public class Main {
 		// test query type
 		int msDelay = 5000;
 		double selectivityFactor = 0.25;
-		int[] knnValues = new int[] { 1, 10, 50, 100, 5000, 100000 };
+//		int[] knnValues = new int[] { 1, 10, 50, 100, 5000, 100000 };
 //		testSearchQuery(dataset, xRange, yRange, msDelay);
 		testRangeQuery(dataset, selectivityFactor, xRange, yRange, msDelay);
 //		testKnnQuery(dataset, knnValues, xRange, yRange, msDelay);

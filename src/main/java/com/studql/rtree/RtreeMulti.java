@@ -17,6 +17,7 @@ import com.studql.utils.Pair;
 import com.studql.utils.Record;
 
 public class RtreeMulti<T extends Boundable> extends Rtree<T> {
+	private static final long serialVersionUID = 7086849070527466955L;
 	private Lock rootLock = new ReentrantLock();
 
 	public RtreeMulti() {
